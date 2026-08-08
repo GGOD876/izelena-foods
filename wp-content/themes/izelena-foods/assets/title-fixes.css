@@ -14,7 +14,11 @@
 }
 
 .hero-art img {
-  height: 78%;
+  width: auto;
+  max-width: 86%;
+  height: auto;
+  max-height: 68%;
+  object-fit: contain;
 }
 
 .section h2,
@@ -68,7 +72,11 @@
   }
 
   .hero-art img {
-    height: 80%;
+    width: auto;
+    max-width: 88%;
+    height: auto;
+    max-height: 70%;
+    object-fit: contain;
   }
 
   .section h2,
