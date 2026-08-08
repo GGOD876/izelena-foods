@@ -8,7 +8,7 @@
       <div class="actions"><a class="btn primary" href="<?php echo esc_url(home_url('/shop/')); ?>">Shop the flavours <span aria-hidden="true">↗</span></a><a class="text-btn" href="<?php echo esc_url(home_url('/our-story/')); ?>">Read our story <span aria-hidden="true">→</span></a></div>
       <div class="hero-proof"><span>Small-batch flavour</span><span>Scotch Bonnet roots</span><span>Jamaica, always</span></div>
     </div>
-    <div class="hero-art"><div class="burst">A little<br><b>Jamaica</b><br>in every bite.</div><img src="<?php echo esc_url(get_template_directory_uri() . '/assets/izelena-face.png'); ?>" alt="Illustration of Miss Izelena"><div class="tile-label">EXOTIC<br>ISLAND<br>FLAVOURS</div></div>
+    <div class="hero-art"><div class="burst">A little<br><b>Jamaica</b><br>in every bite.</div><div class="hero-subject"><img src="<?php echo esc_url(get_template_directory_uri() . '/assets/izelena-face.png'); ?>" alt="Illustration of Miss Izelena"><span class="hero-subject-tile" aria-hidden="true"></span></div><div class="tile-label">EXOTIC<br>ISLAND<br>FLAVOURS</div></div>
   </section>
   <section class="marquee"><span>Season your story</span><span aria-hidden="true">•</span><span>Share the flavour</span><span aria-hidden="true">•</span><span>Feed your people</span><span aria-hidden="true">•</span></section>
   <section class="section products-section"><div class="section-head"><div><p class="eyebrow">Start here</p><h2>Find your favourite.</h2></div><a class="text-btn" href="<?php echo esc_url(home_url('/shop/')); ?>">See all flavours <span aria-hidden="true">↗</span></a></div><div class="product-grid home-products"><?php foreach (array_slice($products, 0, 4) as $product) { izelena_product_card($product, true, true); } ?></div></section>
