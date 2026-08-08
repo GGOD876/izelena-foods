@@ -298,13 +298,19 @@ footer {
 
 .quantity-controls input,
 .quantity-controls span {
-  width: 38px;
-  min-width: 30px;
+  width: 7ch;
+  min-width: 7ch;
   padding: 0;
   border: 0;
   background: transparent;
   text-align: center;
   font-size: 13px;
+}
+
+.modal-price small {
+  font-size: 11px;
+  color: #5e5b50;
+  font-weight: 400;
 }
 
 .cart-actions {

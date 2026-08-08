@@ -13,14 +13,20 @@ function izelena_setup() {
 add_action('after_setup_theme', 'izelena_setup');
 
 function izelena_assets() {
-    wp_enqueue_style('izelena-style', get_stylesheet_uri(), array(), '4.2.2');
-    wp_enqueue_script('izelena-interactions', get_template_directory_uri() . '/assets/theme.js', array(), '4.2.2', true);
+    wp_enqueue_style('izelena-style', get_stylesheet_uri(), array(), '4.2.3');
+    wp_enqueue_script('izelena-interactions', get_template_directory_uri() . '/assets/theme.js', array(), '4.2.3', true);
     wp_localize_script('izelena-interactions', 'izelenaConfig', array(
         'ajaxUrl' => admin_url('admin-ajax.php'),
         'contactNonce' => wp_create_nonce('izelena_contact_submit'),
     ));
 }
 add_action('wp_enqueue_scripts', 'izelena_assets');
+
+function izelena_favicon() {
+    echo '<link rel="icon" type="image/png" href="' . esc_url(get_template_directory_uri() . '/assets/izelena-flower.png') . '">';
+    echo '<link rel="apple-touch-icon" href="' . esc_url(get_template_directory_uri() . '/assets/izelena-flower.png') . '">';
+}
+add_action('wp_head', 'izelena_favicon', 5);
 
 function izelena_register_contact_submission() {
     register_post_type('izelena_submission', array(

@@ -41,7 +41,7 @@
   }
 
   function addProduct(product, quantity) {
-    var amount = Math.max(1, Number(quantity) || 1);
+    var amount = Math.max(1, Math.min(999999, Number(quantity) || 1));
     var next = {
       id: product.id || '',
       name: product.name || 'Izelena flavour',
@@ -54,7 +54,7 @@
       return item.name === next.name && Number(item.price || 0) === next.price && item.tone === next.tone;
     });
     if (existing) {
-      existing.quantity = Number(existing.quantity || 1) + amount;
+      existing.quantity = Math.min(999999, Number(existing.quantity || 1) + amount);
     } else {
       cart.push(next);
     }
@@ -72,7 +72,7 @@
     var lines = cart.map(function (item, index) {
       var quantity = Number(item.quantity || 1);
       var subtotal = Number(item.price || 0) * quantity;
-      return '<div class="cart-line"><div class="mini ' + escapeHtml(item.tone) + '">' + escapeHtml(item.name.charAt(0)) + '</div><div><b>' + escapeHtml(item.name) + '</b><span>Unit price ' + money(item.price) + '</span><span class="cart-quantity">Quantity ' + quantity + '</span><strong class="cart-subtotal">Line subtotal ' + money(subtotal) + '</strong></div><div class="cart-actions"><div class="quantity-controls" aria-label="' + escapeHtml(item.name) + ' quantity"><button type="button" data-cart-quantity="' + index + '" data-quantity-change="-1" aria-label="Decrease ' + escapeHtml(item.name) + ' quantity">−</button><span aria-live="polite">' + quantity + '</span><button type="button" data-cart-quantity="' + index + '" data-quantity-change="1" aria-label="Increase ' + escapeHtml(item.name) + ' quantity">+</button></div><button class="cart-remove" type="button" data-remove-cart="' + index + '">Remove</button></div></div>';
+      return '<div class="cart-line"><div class="mini ' + escapeHtml(item.tone) + '">' + escapeHtml(item.name.charAt(0)) + '</div><div><b>' + escapeHtml(item.name) + '</b><span>Unit price ' + money(item.price) + '</span><span class="cart-quantity">Quantity</span><strong class="cart-subtotal">Line subtotal ' + money(subtotal) + '</strong></div><div class="cart-actions"><div class="quantity-controls" aria-label="' + escapeHtml(item.name) + ' quantity"><button type="button" data-cart-quantity="' + index + '" data-quantity-change="-1" aria-label="Decrease ' + escapeHtml(item.name) + ' quantity">−</button><input type="number" min="1" max="999999" value="' + quantity + '" data-cart-quantity-input="' + index + '" aria-label="' + escapeHtml(item.name) + ' quantity"><button type="button" data-cart-quantity="' + index + '" data-quantity-change="1" aria-label="Increase ' + escapeHtml(item.name) + ' quantity">+</button></div><button class="cart-remove" type="button" data-remove-cart="' + index + '">Remove</button></div></div>';
     }).join('');
     if (!cart.length) return '<div class="empty"><p>Your cart is waiting for a little island flavour.</p></div>';
     return lines + '<div class="cart-total"><span>Estimated total</span><strong>' + money(cart.reduce(function (total, item) { return total + Number(item.price || 0) * Number(item.quantity || 1); }, 0)) + '</strong></div><button class="btn primary full" type="button" disabled title="Checkout will be enabled when payment is connected">Checkout coming soon</button>';
@@ -98,8 +98,19 @@
     var modalAdd = overlay.querySelector('[data-modal-add]');
     var modalQuantity = document.createElement('div');
     modalQuantity.className = 'modal-quantity';
-    modalQuantity.innerHTML = '<span>Quantity</span><div class="quantity-controls" aria-label="' + escapeHtml(product.name) + ' quantity"><button type="button" data-modal-quantity-change="-1" aria-label="Decrease ' + escapeHtml(product.name) + ' quantity">-</button><input type="number" min="1" value="1" data-modal-quantity aria-label="' + escapeHtml(product.name) + ' quantity"><button type="button" data-modal-quantity-change="1" aria-label="Increase ' + escapeHtml(product.name) + ' quantity">+</button></div>';
+    modalQuantity.innerHTML = '<span>Quantity</span><div class="quantity-controls" aria-label="' + escapeHtml(product.name) + ' quantity"><button type="button" data-modal-quantity-change="-1" aria-label="Decrease ' + escapeHtml(product.name) + ' quantity">-</button><input type="number" min="1" max="999999" value="1" data-modal-quantity aria-label="' + escapeHtml(product.name) + ' quantity"><button type="button" data-modal-quantity-change="1" aria-label="Increase ' + escapeHtml(product.name) + ' quantity">+</button></div>';
     if (modalAdd) modalAdd.parentNode.insertBefore(modalQuantity, modalAdd);
+    updateModalPrice(overlay);
+  }
+
+  function updateModalPrice(overlay) {
+    if (!overlay || !overlay.izelenaProduct) return;
+    var input = overlay.querySelector('[data-modal-quantity]');
+    var price = overlay.querySelector('.modal-price');
+    if (!input || !price) return;
+    var quantity = Math.max(1, Math.min(999999, Number(input.value) || 1));
+    var unit = Number(overlay.izelenaProduct.price || 0);
+    price.textContent = (quantity === 1 ? 'Unit price ' : 'Subtotal ') + money(unit * quantity) + (quantity > 1 ? ' (' + quantity + ' × ' + money(unit) + ')' : '');
   }
 
   function prepareOverlay(overlay, trigger) {
@@ -186,6 +197,43 @@
     prepareOverlay(overlay, trigger);
   }
 
+  document.addEventListener('input', function (event) {
+    var modalInput = event.target.closest('[data-modal-quantity]');
+    if (modalInput) updateModalPrice(modalInput.closest('.overlay'));
+  });
+
+  document.addEventListener('change', function (event) {
+    var cartInput = event.target.closest('[data-cart-quantity-input]');
+    if (cartInput) {
+      var cartIndex = Number(cartInput.getAttribute('data-cart-quantity-input'));
+      var cartItem = cart[cartIndex];
+      if (cartItem) cartItem.quantity = Math.max(1, Math.min(999999, Number(cartInput.value) || 1));
+      renderCart();
+      return;
+    }
+    var modalInput = event.target.closest('[data-modal-quantity]');
+    if (modalInput) {
+      modalInput.value = Math.max(1, Math.min(999999, Number(modalInput.value) || 1));
+      updateModalPrice(modalInput.closest('.overlay'));
+    }
+  });
+
+  document.addEventListener('blur', function (event) {
+    var cartInput = event.target.closest('[data-cart-quantity-input]');
+    if (cartInput) {
+      var cartIndex = Number(cartInput.getAttribute('data-cart-quantity-input'));
+      var cartItem = cart[cartIndex];
+      if (cartItem) cartItem.quantity = Math.max(1, Math.min(999999, Number(cartInput.value) || 1));
+      renderCart();
+      return;
+    }
+    var modalInput = event.target.closest('[data-modal-quantity]');
+    if (modalInput) {
+      modalInput.value = Math.max(1, Math.min(999999, Number(modalInput.value) || 1));
+      updateModalPrice(modalInput.closest('.overlay'));
+    }
+  }, true);
+
   document.addEventListener('click', function (event) {
     var contactReset = event.target.closest('[data-contact-reset]');
     if (contactReset) {
@@ -227,7 +275,7 @@
     if (cartQuantityButton) {
       var cartIndex = Number(cartQuantityButton.getAttribute('data-cart-quantity'));
       var cartItem = cart[cartIndex];
-      if (cartItem) cartItem.quantity = Math.max(1, Number(cartItem.quantity || 1) + Number(cartQuantityButton.getAttribute('data-quantity-change') || 0));
+      if (cartItem) cartItem.quantity = Math.max(1, Math.min(999999, Number(cartItem.quantity || 1) + Number(cartQuantityButton.getAttribute('data-quantity-change') || 0)));
       renderCart();
       return;
     }
@@ -235,7 +283,10 @@
     var modalQuantityButton = event.target.closest('[data-modal-quantity-change]');
     if (modalQuantityButton) {
       var modalQuantityInput = modalQuantityButton.closest('.quantity-controls').querySelector('[data-modal-quantity]');
-      if (modalQuantityInput) modalQuantityInput.value = Math.max(1, Number(modalQuantityInput.value || 1) + Number(modalQuantityButton.getAttribute('data-modal-quantity-change') || 0));
+      if (modalQuantityInput) {
+        modalQuantityInput.value = Math.max(1, Math.min(999999, Number(modalQuantityInput.value || 1) + Number(modalQuantityButton.getAttribute('data-modal-quantity-change') || 0)));
+        updateModalPrice(modalQuantityButton.closest('.overlay'));
+      }
       return;
     }
 
@@ -244,7 +295,7 @@
       var modalOverlay = modalAdd.closest('.overlay');
       if (modalOverlay && modalOverlay.izelenaProduct) {
         var quantityInput = modalOverlay.querySelector('[data-modal-quantity]');
-        addProduct(modalOverlay.izelenaProduct, quantityInput ? quantityInput.value : 1);
+        addProduct(modalOverlay.izelenaProduct, quantityInput ? Math.max(1, Math.min(999999, Number(quantityInput.value) || 1)) : 1);
       }
       closeOverlay(modalOverlay);
       return;
@@ -298,6 +349,12 @@
   });
 
   document.addEventListener('keydown', function (event) {
+    var cartInput = event.target.closest('[data-cart-quantity-input]');
+    if (cartInput && event.key === 'Enter') {
+      event.preventDefault();
+      cartInput.blur();
+      return;
+    }
     if (event.key === 'Escape') {
       closeOverlay();
       return;
