@@ -40,20 +40,21 @@
     };
   }
 
-  function addProduct(product) {
+  function addProduct(product, quantity) {
+    var amount = Math.max(1, Number(quantity) || 1);
     var next = {
       id: product.id || '',
       name: product.name || 'Izelena flavour',
       price: Number(product.price || 0),
       tone: product.tone || 'red',
-      quantity: 1
+      quantity: amount
     };
     var existing = cart.find(function (item) {
       if (next.id && item.id) return String(item.id) === String(next.id);
       return item.name === next.name && Number(item.price || 0) === next.price && item.tone === next.tone;
     });
     if (existing) {
-      existing.quantity = Number(existing.quantity || 1) + 1;
+      existing.quantity = Number(existing.quantity || 1) + amount;
     } else {
       cart.push(next);
     }
@@ -71,7 +72,7 @@
     var lines = cart.map(function (item, index) {
       var quantity = Number(item.quantity || 1);
       var subtotal = Number(item.price || 0) * quantity;
-      return '<div class="cart-line"><div class="mini ' + escapeHtml(item.tone) + '">' + escapeHtml(item.name.charAt(0)) + '</div><div><b>' + escapeHtml(item.name) + '</b><span>Unit price ' + money(item.price) + '</span><span class="cart-quantity">Quantity ' + quantity + '</span><strong class="cart-subtotal">Line subtotal ' + money(subtotal) + '</strong></div><button type="button" data-remove-cart="' + index + '">Remove</button></div>';
+      return '<div class="cart-line"><div class="mini ' + escapeHtml(item.tone) + '">' + escapeHtml(item.name.charAt(0)) + '</div><div><b>' + escapeHtml(item.name) + '</b><span>Unit price ' + money(item.price) + '</span><span class="cart-quantity">Quantity ' + quantity + '</span><strong class="cart-subtotal">Line subtotal ' + money(subtotal) + '</strong></div><div class="cart-actions"><div class="quantity-controls" aria-label="' + escapeHtml(item.name) + ' quantity"><button type="button" data-cart-quantity="' + index + '" data-quantity-change="-1" aria-label="Decrease ' + escapeHtml(item.name) + ' quantity">−</button><span aria-live="polite">' + quantity + '</span><button type="button" data-cart-quantity="' + index + '" data-quantity-change="1" aria-label="Increase ' + escapeHtml(item.name) + ' quantity">+</button></div><button class="cart-remove" type="button" data-remove-cart="' + index + '">Remove</button></div></div>';
     }).join('');
     if (!cart.length) return '<div class="empty"><p>Your cart is waiting for a little island flavour.</p></div>';
     return lines + '<div class="cart-total"><span>Estimated total</span><strong>' + money(cart.reduce(function (total, item) { return total + Number(item.price || 0) * Number(item.quantity || 1); }, 0)) + '</strong></div><button class="btn primary full" type="button" disabled title="Checkout will be enabled when payment is connected">Checkout coming soon</button>';
@@ -93,12 +94,21 @@
     returnFocus = null;
   }
 
+  function addModalQuantityControls(overlay, product) {
+    var modalAdd = overlay.querySelector('[data-modal-add]');
+    var modalQuantity = document.createElement('div');
+    modalQuantity.className = 'modal-quantity';
+    modalQuantity.innerHTML = '<span>Quantity</span><div class="quantity-controls" aria-label="' + escapeHtml(product.name) + ' quantity"><button type="button" data-modal-quantity-change="-1" aria-label="Decrease ' + escapeHtml(product.name) + ' quantity">-</button><input type="number" min="1" value="1" data-modal-quantity aria-label="' + escapeHtml(product.name) + ' quantity"><button type="button" data-modal-quantity-change="1" aria-label="Increase ' + escapeHtml(product.name) + ' quantity">+</button></div>';
+    if (modalAdd) modalAdd.parentNode.insertBefore(modalQuantity, modalAdd);
+  }
+
   function prepareOverlay(overlay, trigger) {
     closeOverlay();
     returnFocus = trigger || document.activeElement;
     document.body.appendChild(overlay);
     var close = overlay.querySelector('.close');
     if (close) close.focus();
+    if (overlay.izelenaProduct) addModalQuantityControls(overlay, overlay.izelenaProduct);
   }
 
   function resetContactForm(form) {
@@ -213,10 +223,29 @@
       return;
     }
 
+    var cartQuantityButton = event.target.closest('[data-cart-quantity][data-quantity-change]');
+    if (cartQuantityButton) {
+      var cartIndex = Number(cartQuantityButton.getAttribute('data-cart-quantity'));
+      var cartItem = cart[cartIndex];
+      if (cartItem) cartItem.quantity = Math.max(1, Number(cartItem.quantity || 1) + Number(cartQuantityButton.getAttribute('data-quantity-change') || 0));
+      renderCart();
+      return;
+    }
+
+    var modalQuantityButton = event.target.closest('[data-modal-quantity-change]');
+    if (modalQuantityButton) {
+      var modalQuantityInput = modalQuantityButton.closest('.quantity-controls').querySelector('[data-modal-quantity]');
+      if (modalQuantityInput) modalQuantityInput.value = Math.max(1, Number(modalQuantityInput.value || 1) + Number(modalQuantityButton.getAttribute('data-modal-quantity-change') || 0));
+      return;
+    }
+
     var modalAdd = event.target.closest('[data-modal-add]');
     if (modalAdd) {
       var modalOverlay = modalAdd.closest('.overlay');
-      if (modalOverlay && modalOverlay.izelenaProduct) addProduct(modalOverlay.izelenaProduct);
+      if (modalOverlay && modalOverlay.izelenaProduct) {
+        var quantityInput = modalOverlay.querySelector('[data-modal-quantity]');
+        addProduct(modalOverlay.izelenaProduct, quantityInput ? quantityInput.value : 1);
+      }
       closeOverlay(modalOverlay);
       return;
     }
