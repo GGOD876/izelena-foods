@@ -1,0 +1,15 @@
+services:
+  - type: web
+    name: izelena-foods
+    runtime: docker
+    plan: free
+    healthCheckPath: /
+    envVars:
+      - key: WORDPRESS_DB_NAME
+        value: wordpress
+      - key: WORDPRESS_DB_USER
+        value: wordpress
+      - key: WORDPRESS_DB_PASSWORD
+        generateValue: true
+      - key: MARIADB_ROOT_PASSWORD
+        generateValue: true
