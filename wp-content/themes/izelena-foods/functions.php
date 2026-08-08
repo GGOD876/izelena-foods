@@ -220,10 +220,10 @@ add_action('customize_register', 'izelena_customizer');
 
 function izelena_demo_products() {
     return array(
-        array('id' => 'jerk-seasoning', 'name' => 'Jerk Seasoning', 'tag' => 'The heartbeat of Jamaican cooking', 'desc' => 'An authentic jerk marinade bursting with pimento, thyme, scallion, and Scotch Bonnet heat.', 'price' => 900, 'heat' => 'medium', 'tone' => 'gold', 'note' => 'Sweet heat. Smoky finish.'),
-        array('id' => 'jerk-bbq', 'name' => 'Jerk BBQ Sauce', 'tag' => 'Sweet heat. Smoky finish.', 'desc' => 'A bold fusion of classic BBQ sweetness and jerk spice for meats, wings and anything worth glazing.', 'price' => 150, 'heat' => 'medium', 'tone' => 'red', 'note' => 'Rich, smoky glaze.'),
-        array('id' => 'mango', 'name' => 'Mango Salsa', 'tag' => 'Sweet island sunshine', 'desc' => 'A smooth tropical mango sauce with a mild finish - perfect for dipping, glazing and pairing.', 'price' => 140, 'heat' => 'mild', 'tone' => 'yellow', 'note' => 'Soft mango. Gentle warmth.'),
-        array('id' => 'spicy-mango', 'name' => 'Spicy Mango Salsa', 'tag' => 'Sweet meets fire', 'desc' => 'Ripe mango sweetness and pepper heat, balanced for a perfectly bright sweet-spicy kick.', 'price' => 150, 'heat' => 'hot', 'tone' => 'green', 'note' => 'A bright, balanced kick.'),
+        array('id' => 'jerk-seasoning', 'name' => 'Jerk Seasoning', 'tag' => 'The heartbeat of Jamaican cooking', 'desc' => 'An authentic jerk marinade bursting with pimento, thyme, scallion, and Scotch Bonnet heat.', 'price' => 900, 'heat' => 'medium', 'tone' => 'gold', 'note' => 'Sweet heat. Smoky finish.', 'image' => 'heartbeat-of-jamaican-cooking-jerk-marinade.jpg'),
+        array('id' => 'jerk-bbq', 'name' => 'Jerk BBQ Sauce', 'tag' => 'Sweet heat. Smoky finish.', 'desc' => 'A bold fusion of classic BBQ sweetness and jerk spice for meats, wings and anything worth glazing.', 'price' => 150, 'heat' => 'medium', 'tone' => 'red', 'note' => 'Rich, smoky glaze.', 'image' => 'sweet-heat-smoky-finish-bbq-jerk-sauce.jpg'),
+        array('id' => 'mango', 'name' => 'Mango Salsa', 'tag' => 'Sweet island sunshine', 'desc' => 'A smooth tropical mango sauce with a mild finish - perfect for dipping, glazing and pairing.', 'price' => 140, 'heat' => 'mild', 'tone' => 'yellow', 'note' => 'Soft mango. Gentle warmth.', 'image' => 'sweet-island-sunshine-mango-sauce.jpg'),
+        array('id' => 'spicy-mango', 'name' => 'Spicy Mango Salsa', 'tag' => 'Sweet meets fire', 'desc' => 'Ripe mango sweetness and pepper heat, balanced for a perfectly bright sweet-spicy kick.', 'price' => 150, 'heat' => 'hot', 'tone' => 'green', 'note' => 'A bright, balanced kick.', 'image' => 'sweet-meets-fire-spicy-mango-sauce.jpg'),
         array('id' => 'sorrel', 'name' => 'Sorrel Pepper Sauce', 'tag' => 'Tangy, spicy, unforgettable', 'desc' => 'Traditional Jamaican sorrel meets fiery peppers in a vibrant balance of tangy sweetness and heat.', 'price' => 150, 'heat' => 'hot', 'tone' => 'burgundy', 'note' => 'Bold Caribbean heat.'),
         array('id' => 'crushed', 'name' => 'Crushed Pepper Sauce', 'tag' => 'Bring the heat. Keep the flavour.', 'desc' => 'A vibrant fiery pepper sauce designed to enhance - not overpower - every meal.', 'price' => 150, 'heat' => 'hot', 'tone' => 'black', 'note' => 'For serious pepper fans.', 'soon' => true),
     );
@@ -251,7 +251,9 @@ function izelena_product_card($product, $fallback = false, $modal_trigger = fals
         if ($product->is_purchasable() && $product->is_in_stock() && $product->is_type('simple')) $action = '<a class="add-btn add_to_cart_button ajax_add_to_cart" href="' . esc_url($product->add_to_cart_url()) . '" data-product_id="' . esc_attr($product->get_id()) . '">Add <span>+</span></a>';
     } else {
         $id = $product['id'] ?? sanitize_title($product['name']);
-        $name = $product['name']; $tag = $product['tag']; $desc = $product['desc']; $heat = $product['heat']; $tone = $product['tone']; $image = '';
+        $name = $product['name']; $tag = $product['tag']; $desc = $product['desc']; $heat = $product['heat']; $tone = $product['tone'];
+        $image_file = $product['image'] ?? '';
+        $image = $image_file ? '<img class="product-card-image" src="' . esc_url(get_template_directory_uri() . '/assets/' . $image_file) . '" alt="' . esc_attr($name . ' product') . '">' : '';
         $soon = !empty($product['soon']);
         $url = home_url('/product/' . sanitize_title($name) . '/');
         $price = 'From J$' . number_format_i18n((float) $product['price']);
@@ -273,7 +275,8 @@ function izelena_product_card($product, $fallback = false, $modal_trigger = fals
     if ($modal_trigger) {
         echo '<div class="shop-product-trigger" role="button" tabindex="0" aria-label="' . esc_attr(sprintf(__('View %s', 'izelena-foods'), $name)) . '">';
     }
-    echo '<article class="product-card ' . esc_attr($tone) . '"' . $metadata . '><div class="product-visual">' . $image . '<span class="product-mark">' . esc_html(strtoupper($initials)) . '</span><span class="heat-pill">' . esc_html($heat) . '</span>' . ($soon ? '<span class="soon">Coming soon</span>' : '') . '</div><div class="product-info"><p class="eyebrow">' . esc_html($tag) . '</p><h3><a href="' . esc_url($url) . '">' . esc_html($name) . '</a></h3><p>' . esc_html($desc) . '</p><div class="product-row"><strong>' . wp_kses_post($price) . '</strong>' . $action . '</div></div></article>';
+    $visual_mark = $image ? $image : '<span class="product-mark">' . esc_html(strtoupper($initials)) . '</span>';
+    echo '<article class="product-card ' . esc_attr($tone) . '"' . $metadata . '><div class="product-visual">' . $visual_mark . '<span class="heat-pill">' . esc_html($heat) . '</span>' . ($soon ? '<span class="soon">Coming soon</span>' : '') . '</div><div class="product-info"><p class="eyebrow">' . esc_html($tag) . '</p><h3><a href="' . esc_url($url) . '">' . esc_html($name) . '</a></h3><p>' . esc_html($desc) . '</p><div class="product-row"><strong>' . wp_kses_post($price) . '</strong>' . $action . '</div></div></article>';
     if ($modal_trigger) echo '</div>';
 }
 
