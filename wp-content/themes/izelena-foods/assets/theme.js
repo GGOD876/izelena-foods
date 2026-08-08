@@ -13,6 +13,17 @@
     });
   }
 
+  function safeImageUrl(value) {
+    if (!value) return '';
+    try {
+      var parsed = new URL(String(value), document.baseURI);
+      if (parsed.protocol !== 'http:' && parsed.protocol !== 'https:') return '';
+      return parsed.href;
+    } catch (error) {
+      return '';
+    }
+  }
+
   function updateCount() {
     document.querySelectorAll('.cart span').forEach(function (count) {
       count.textContent = totalCartItems();
@@ -54,6 +65,7 @@
       heat: card.getAttribute('data-product-heat') || 'medium',
       tone: card.getAttribute('data-product-tone') || 'red',
       initials: card.getAttribute('data-product-initials') || '',
+      image: safeImageUrl(card.getAttribute('data-product-image') || ''),
       url: card.getAttribute('data-product-url') || '',
       soon: card.getAttribute('data-product-soon') === '1'
     };
@@ -150,13 +162,35 @@
     price.textContent = (quantity === 1 ? 'Unit price ' : 'Subtotal ') + money(unit * quantity) + (quantity > 1 ? ' (' + quantity + ' × ' + money(unit) + ')' : '');
   }
 
+  function modalArtwork(product) {
+    var fallback = '<span class="modal-art-fallback" aria-hidden="true">' + escapeHtml(product.initials) + '</span>';
+    var image = product.image ? '<img class="modal-product-image" src="' + escapeHtml(product.image) + '" alt="' + escapeHtml(product.name + ' product') + '">' : '';
+    return fallback + image;
+  }
+
+  function enhanceModalArtwork(overlay, product) {
+    var modalArt = overlay.querySelector('.modal-art');
+    if (!modalArt) return;
+    modalArt.innerHTML = modalArtwork(product);
+    var fallback = modalArt.querySelector('.modal-art-fallback');
+    var image = modalArt.querySelector('.modal-product-image');
+    if (fallback) fallback.setAttribute('aria-hidden', 'true');
+    if (!image) return;
+    image.addEventListener('load', function () { modalArt.classList.add('has-image'); });
+    image.addEventListener('error', function () { image.remove(); modalArt.classList.remove('has-image'); });
+    if (image.complete && image.naturalWidth > 0) modalArt.classList.add('has-image');
+  }
+
   function prepareOverlay(overlay, trigger) {
     closeOverlay();
     returnFocus = trigger || document.activeElement;
     document.body.appendChild(overlay);
     var close = overlay.querySelector('.close');
     if (close) close.focus();
-    if (overlay.izelenaProduct) addModalQuantityControls(overlay, overlay.izelenaProduct);
+    if (overlay.izelenaProduct) {
+      addModalQuantityControls(overlay, overlay.izelenaProduct);
+      enhanceModalArtwork(overlay, overlay.izelenaProduct);
+    }
   }
 
   function resetContactForm(form) {

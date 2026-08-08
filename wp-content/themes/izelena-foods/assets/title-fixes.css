@@ -60,6 +60,15 @@
   font-size: 19px;
 }
 
+.product-info h3,
+.product-info h3 a,
+.modal-content h2 {
+  overflow-wrap: normal;
+  word-break: normal;
+  hyphens: none;
+  text-wrap: balance;
+}
+
 .modal-content {
   min-width: 0;
   padding: 18px 18px 0 0;
@@ -67,8 +76,7 @@
 
 .modal-content h2 {
   max-width: calc(100% - 34px);
-  overflow-wrap: anywhere;
-  font-size: clamp(2rem, 3.6vw, 3.6rem);
+  font-size: clamp(2rem, 2.8vw, 3.2rem);
 }
 
 .modal-content .eyebrow {

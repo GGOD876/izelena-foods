@@ -338,3 +338,4 @@ footer {
   text-decoration: underline;
 }
 .product-card-image{position:relative;z-index:1;display:block;width:100%;height:100%;min-width:0;min-height:0;padding:0;object-fit:contain;object-position:center center}
+.modal-art{position:relative;overflow:hidden}.modal-art-fallback{position:relative;z-index:0;transition:opacity .15s ease}.modal-art.has-image .modal-art-fallback{opacity:0}.modal-product-image{position:absolute;inset:0;z-index:1;display:block;width:100%;height:100%;padding:18px;object-fit:contain;object-position:center center}

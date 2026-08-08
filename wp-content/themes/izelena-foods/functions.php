@@ -13,9 +13,9 @@ function izelena_setup() {
 add_action('after_setup_theme', 'izelena_setup');
 
 function izelena_assets() {
-    wp_enqueue_style('izelena-style', get_stylesheet_uri(), array(), '4.2.8');
-    wp_enqueue_style('izelena-title-fixes', get_template_directory_uri() . '/assets/title-fixes.css', array('izelena-style'), '4.2.8');
-    wp_enqueue_script('izelena-interactions', get_template_directory_uri() . '/assets/theme.js', array(), '4.2.4', true);
+    wp_enqueue_style('izelena-style', get_stylesheet_uri(), array(), '4.2.9');
+    wp_enqueue_style('izelena-title-fixes', get_template_directory_uri() . '/assets/title-fixes.css', array('izelena-style'), '4.2.9');
+    wp_enqueue_script('izelena-interactions', get_template_directory_uri() . '/assets/theme.js', array(), '4.2.5', true);
     wp_localize_script('izelena-interactions', 'izelenaConfig', array(
         'ajaxUrl' => admin_url('admin-ajax.php'),
         'contactNonce' => wp_create_nonce('izelena_contact_submit'),
@@ -237,6 +237,7 @@ function izelena_product_heat($product_id) {
 function izelena_product_card($product, $fallback = false, $modal_trigger = false) {
     $is_wc = !$fallback && is_object($product) && is_a($product, 'WC_Product');
     $soon = false;
+    $image_url = '';
     if ($is_wc) {
         $id = (string) $product->get_id();
         $name = $product->get_name();
@@ -246,6 +247,7 @@ function izelena_product_card($product, $fallback = false, $modal_trigger = fals
         $tone = 'red';
         $url = $product->get_permalink();
         $image = $product->get_image('woocommerce_thumbnail', array('class' => 'product-image'));
+        if ($product->get_image_id()) $image_url = wp_get_attachment_image_url($product->get_image_id(), 'large');
         $price = function_exists('wc_price') && '' !== $product->get_price() ? wc_price(wc_get_price_to_display($product), array('currency' => 'JMD')) : '';
         $action = '<a class="add-btn" href="' . esc_url($url) . '">View <span>↗</span></a>';
         if ($product->is_purchasable() && $product->is_in_stock() && $product->is_type('simple')) $action = '<a class="add-btn add_to_cart_button ajax_add_to_cart" href="' . esc_url($product->add_to_cart_url()) . '" data-product_id="' . esc_attr($product->get_id()) . '">Add <span>+</span></a>';
@@ -253,7 +255,8 @@ function izelena_product_card($product, $fallback = false, $modal_trigger = fals
         $id = $product['id'] ?? sanitize_title($product['name']);
         $name = $product['name']; $tag = $product['tag']; $desc = $product['desc']; $heat = $product['heat']; $tone = $product['tone'];
         $image_file = $product['image'] ?? '';
-        $image = $image_file ? '<img class="product-card-image" src="' . esc_url(get_template_directory_uri() . '/assets/' . $image_file) . '" alt="' . esc_attr($name . ' product') . '">' : '';
+        $image_url = $image_file ? get_template_directory_uri() . '/assets/' . $image_file : '';
+        $image = $image_url ? '<img class="product-card-image" src="' . esc_url($image_url) . '" alt="' . esc_attr($name . ' product') . '">' : '';
         $soon = !empty($product['soon']);
         $url = home_url('/product/' . sanitize_title($name) . '/');
         $price = 'From J$' . number_format_i18n((float) $product['price']);
@@ -270,6 +273,7 @@ function izelena_product_card($product, $fallback = false, $modal_trigger = fals
         . ' data-product-heat="' . esc_attr($heat) . '"'
         . ' data-product-tone="' . esc_attr($tone) . '"'
         . ' data-product-initials="' . esc_attr(strtoupper($initials)) . '"'
+        . ' data-product-image="' . esc_attr($image_url) . '"'
         . ' data-product-url="' . esc_url($url) . '"'
         . ' data-product-soon="' . ($soon ? '1' : '0') . '"';
     if ($modal_trigger) {
