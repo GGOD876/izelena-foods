@@ -310,6 +310,17 @@ footer {
   font-size: 13px;
 }
 
+.quantity-controls input[type="number"] {
+  -moz-appearance: textfield;
+  appearance: textfield;
+}
+
+.quantity-controls input[type="number"]::-webkit-inner-spin-button,
+.quantity-controls input[type="number"]::-webkit-outer-spin-button {
+  -webkit-appearance: none;
+  margin: 0;
+}
+
 .modal-price small {
   font-size: 11px;
   color: #5e5b50;
