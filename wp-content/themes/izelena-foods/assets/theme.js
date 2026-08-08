@@ -25,6 +25,25 @@
     }, 0);
   }
 
+  function showToast(message, type) {
+    var region = document.querySelector('.izelena-toast-region');
+    if (!region) {
+      region = document.createElement('div');
+      region.className = 'izelena-toast-region';
+      region.setAttribute('aria-live', 'polite');
+      region.setAttribute('aria-atomic', 'true');
+      document.body.appendChild(region);
+    }
+    var toast = document.createElement('div');
+    toast.className = 'izelena-toast izelena-toast-' + (type === 'error' ? 'error' : 'success');
+    toast.setAttribute('role', 'status');
+    toast.innerHTML = '<span aria-hidden="true">' + (type === 'error' ? '!' : '✓') + '</span><p>' + escapeHtml(message) + '</p><button type="button" aria-label="Dismiss notification">&times;</button>';
+    region.appendChild(toast);
+    var dismiss = toast.querySelector('button');
+    var timer = window.setTimeout(function () { toast.remove(); }, 4200);
+    if (dismiss) dismiss.addEventListener('click', function () { window.clearTimeout(timer); toast.remove(); });
+  }
+
   function productFromCard(card) {
     return {
       id: card.getAttribute('data-product-id') || '',
@@ -41,7 +60,16 @@
   }
 
   function addProduct(product, quantity) {
-    var amount = Math.max(1, Math.min(999999, Number(quantity) || 1));
+    if (!product || product.soon) {
+      showToast('This flavour is not available yet.', 'error');
+      return false;
+    }
+    var raw = Number(quantity === undefined ? 1 : quantity);
+    if (!Number.isFinite(raw) || raw < 1) {
+      showToast('Choose a quantity of at least 1.', 'error');
+      return false;
+    }
+    var amount = Math.min(999999, Math.floor(raw));
     var next = {
       id: product.id || '',
       name: product.name || 'Izelena flavour',
@@ -60,12 +88,21 @@
     }
     updateCount();
     if (document.querySelector('.drawer')) renderCart();
+    showToast(next.name + ' added to your selection' + (amount > 1 ? ' · quantity ' + amount.toLocaleString() : '') + '.', 'success');
+    return true;
   }
 
   function addProductCard(card) {
+    if (!card) {
+      showToast('We could not add that flavour. Please try again.', 'error');
+      return false;
+    }
     var button = card.querySelector('.add-btn');
-    if (button && button.disabled) return;
-    addProduct(productFromCard(card));
+    if (button && button.disabled) {
+      showToast('This flavour is not available yet.', 'error');
+      return false;
+    }
+    return addProduct(productFromCard(card));
   }
 
   function cartMarkup() {
@@ -293,11 +330,12 @@
     var modalAdd = event.target.closest('[data-modal-add]');
     if (modalAdd) {
       var modalOverlay = modalAdd.closest('.overlay');
+      var added = false;
       if (modalOverlay && modalOverlay.izelenaProduct) {
         var quantityInput = modalOverlay.querySelector('[data-modal-quantity]');
-        addProduct(modalOverlay.izelenaProduct, quantityInput ? Math.max(1, Math.min(999999, Number(quantityInput.value) || 1)) : 1);
+        added = addProduct(modalOverlay.izelenaProduct, quantityInput ? Math.max(1, Math.min(999999, Number(quantityInput.value) || 1)) : 1);
       }
-      closeOverlay(modalOverlay);
+      if (added) closeOverlay(modalOverlay);
       return;
     }
 
@@ -316,13 +354,13 @@
 
     var detailAdd = event.target.closest('[data-detail-add]');
     if (detailAdd) {
-      addProduct({
+      var detailAdded = addProduct({
         id: detailAdd.getAttribute('data-product-id') || '',
         name: detailAdd.getAttribute('data-product-name') || 'Izelena flavour',
         price: detailAdd.getAttribute('data-product-price') || 0,
         tone: detailAdd.getAttribute('data-product-tone') || 'red'
       });
-      openCart(detailAdd);
+      if (detailAdded) openCart(detailAdd);
       return;
     }
 

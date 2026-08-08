@@ -2,6 +2,8 @@
 @media(max-width:900px){.hero{grid-template-columns:1fr;padding-top:52px}.hero-art{min-height:420px}.hero-proof{margin-top:45px}.product-grid{grid-template-columns:repeat(2,1fr)}.scotch{grid-template-columns:1fr;gap:45px}.story-tease,.story-intro,.contact-grid{grid-template-columns:1fr;gap:45px}.story-image,.story-portrait{min-height:390px}.footer-top{grid-template-columns:1fr 1fr}.footer-top .btn{justify-self:start}.footer-bottom{gap:15px;flex-wrap:wrap}.archive{grid-template-columns:repeat(2,1fr)}}
 @media(max-width:620px){.announcement{font-size:8px}.nav{height:72px}.brand img{width:105px}.menu-toggle{display:block;text-transform:uppercase;font-size:10px;font-weight:800;letter-spacing:.1em}.nav nav{display:none;position:absolute;left:0;right:0;top:72px;background:var(--cream);padding:18px 5vw;border-bottom:1px solid var(--line);flex-direction:column;align-items:flex-start;gap:18px}.nav nav.open{display:flex}.hero{padding:48px 5vw 42px;min-height:0}.hero h1,.page-intro h1{font-size:16vw}.lede{font-size:16px}.actions{align-items:flex-start;flex-direction:column;gap:18px}.hero-art{min-height:350px}.hero-art img{height:86%}.hero-proof{flex-wrap:wrap;gap:10px;font-size:8px;margin-top:36px}.marquee{font-size:8px;gap:12px;overflow:hidden;white-space:nowrap}.section,.page{padding:72px 5vw}.section-head{align-items:start;gap:20px;flex-direction:column}.section h2,.scotch h2,.story-tease h2,.wholesale h2{font-size:14vw}.product-grid,.archive{grid-template-columns:1fr}.product-visual{height:240px}.heat-levels{grid-template-columns:1fr}.heat-levels>div{min-height:0}.scotch{padding:72px 5vw}.story-image{height:330px}.values{grid-template-columns:1fr}.values>div{border-right:0;border-bottom:1px solid var(--line)}.contact-grid form{padding:22px}.footer-top{grid-template-columns:1fr;gap:24px}.footer-top .btn{justify-self:start}.footer-bottom{font-size:8px}.footer-bottom div{gap:10px}.footer-bottom button{font-size:8px}.modal{grid-template-columns:1fr;padding:20px}.modal-art{min-height:220px}.modal h2{font-size:38px}}
 
+.izelena-toast-region{position:fixed;right:24px;top:24px;z-index:30;display:grid;gap:10px;width:min(390px,calc(100vw - 32px))}.izelena-toast{display:grid;grid-template-columns:32px 1fr 24px;align-items:center;gap:12px;padding:14px 14px 14px 12px;background:var(--cream);border:1px solid var(--ink);border-left:5px solid var(--green);box-shadow:7px 7px 0 rgba(17,17,15,.16);animation:izelena-toast-in .22s ease-out}.izelena-toast-error{border-left-color:var(--red)}.izelena-toast>span{display:grid;place-items:center;width:30px;height:30px;background:var(--green);color:var(--ink);font-size:18px;font-weight:900;border-radius:50%}.izelena-toast-error>span{background:var(--red);color:#fff}.izelena-toast p{margin:0;font-size:12px;font-weight:800;line-height:1.35}.izelena-toast button{font-size:22px;line-height:1;color:var(--ink)}@keyframes izelena-toast-in{from{opacity:0;transform:translateY(-8px)}to{opacity:1;transform:translateY(0)}}
+
 /* WordPress component adapters: the approved prototype uses the same visual components, with server links in place of React buttons. */
 .nav nav a{display:inline-block}
 .nav nav a:hover{color:var(--red)}
@@ -290,17 +292,18 @@ footer {
 }
 
 .quantity-controls button {
-  width: 32px;
-  height: 32px;
+  width: 34px;
+  height: 36px;
   font-size: 20px;
   line-height: 1;
 }
 
 .quantity-controls input,
 .quantity-controls span {
-  width: 7ch;
-  min-width: 7ch;
-  padding: 0;
+  width: 8ch;
+  min-width: 8ch;
+  height: 36px;
+  padding: 0 4px;
   border: 0;
   background: transparent;
   text-align: center;
