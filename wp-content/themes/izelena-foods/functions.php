@@ -13,8 +13,8 @@ function izelena_setup() {
 add_action('after_setup_theme', 'izelena_setup');
 
 function izelena_assets() {
-    wp_enqueue_style('izelena-style', get_stylesheet_uri(), array(), '4.0.6');
-    wp_enqueue_script('izelena-interactions', get_template_directory_uri() . '/assets/theme.js', array(), '4.0.2', true);
+    wp_enqueue_style('izelena-style', get_stylesheet_uri(), array(), '4.1.1');
+    wp_enqueue_script('izelena-interactions', get_template_directory_uri() . '/assets/theme.js', array(), '4.1.1', true);
 }
 add_action('wp_enqueue_scripts', 'izelena_assets');
 
@@ -56,8 +56,9 @@ function izelena_product_heat($product_id) {
     return in_array($heat, array('mild', 'medium', 'hot'), true) ? $heat : 'medium';
 }
 
-function izelena_product_card($product, $fallback = false) {
+function izelena_product_card($product, $fallback = false, $modal_trigger = false) {
     $is_wc = !$fallback && is_object($product) && is_a($product, 'WC_Product');
+    $soon = false;
     if ($is_wc) {
         $id = (string) $product->get_id();
         $name = $product->get_name();
@@ -73,14 +74,29 @@ function izelena_product_card($product, $fallback = false) {
     } else {
         $id = $product['id'] ?? sanitize_title($product['name']);
         $name = $product['name']; $tag = $product['tag']; $desc = $product['desc']; $heat = $product['heat']; $tone = $product['tone']; $image = '';
+        $soon = !empty($product['soon']);
         $url = home_url('/product/' . sanitize_title($name) . '/');
         $price = 'From J$' . number_format_i18n((float) $product['price']);
-        $action = !empty($product['soon']) ? '<button class="add-btn" type="button" disabled>Soon <span>+</span></button>' : '<button class="add-btn" type="button" data-demo-add="' . esc_attr($id) . '">Add <span>+</span></button>';
+        $action = $soon ? '<button class="add-btn" type="button" disabled>Soon <span>+</span></button>' : '<button class="add-btn" type="button" data-demo-add="' . esc_attr($id) . '">Add <span>+</span></button>';
     }
     $initials = '';
     foreach (preg_split('/\s+/', $name) as $word) $initials .= substr($word, 0, 1);
     $numeric_price = $is_wc ? (float) $product->get_price() : (float) $product['price'];
-    echo '<article class="product-card ' . esc_attr($tone) . '" data-product-id="' . esc_attr($id) . '" data-product-name="' . esc_attr($name) . '" data-product-price="' . esc_attr($numeric_price) . '" data-product-tone="' . esc_attr($tone) . '"><div class="product-visual">' . $image . '<span class="product-mark">' . esc_html(strtoupper($initials)) . '</span><span class="heat-pill">' . esc_html($heat) . '</span>' . (!empty($product['soon']) ? '<span class="soon">Coming soon</span>' : '') . '</div><div class="product-info"><p class="eyebrow">' . esc_html($tag) . '</p><h3><a href="' . esc_url($url) . '">' . esc_html($name) . '</a></h3><p>' . esc_html($desc) . '</p><div class="product-row"><strong>' . wp_kses_post($price) . '</strong>' . $action . '</div></div></article>';
+    $metadata = ' data-product-id="' . esc_attr($id) . '"'
+        . ' data-product-name="' . esc_attr($name) . '"'
+        . ' data-product-tag="' . esc_attr($tag) . '"'
+        . ' data-product-description="' . esc_attr($desc) . '"'
+        . ' data-product-price="' . esc_attr($numeric_price) . '"'
+        . ' data-product-heat="' . esc_attr($heat) . '"'
+        . ' data-product-tone="' . esc_attr($tone) . '"'
+        . ' data-product-initials="' . esc_attr(strtoupper($initials)) . '"'
+        . ' data-product-url="' . esc_url($url) . '"'
+        . ' data-product-soon="' . ($soon ? '1' : '0') . '"';
+    if ($modal_trigger) {
+        echo '<div class="shop-product-trigger" role="button" tabindex="0" aria-label="' . esc_attr(sprintf(__('View %s', 'izelena-foods'), $name)) . '">';
+    }
+    echo '<article class="product-card ' . esc_attr($tone) . '"' . $metadata . '><div class="product-visual">' . $image . '<span class="product-mark">' . esc_html(strtoupper($initials)) . '</span><span class="heat-pill">' . esc_html($heat) . '</span>' . ($soon ? '<span class="soon">Coming soon</span>' : '') . '</div><div class="product-info"><p class="eyebrow">' . esc_html($tag) . '</p><h3><a href="' . esc_url($url) . '">' . esc_html($name) . '</a></h3><p>' . esc_html($desc) . '</p><div class="product-row"><strong>' . wp_kses_post($price) . '</strong>' . $action . '</div></div></article>';
+    if ($modal_trigger) echo '</div>';
 }
 
 function izelena_product_filter_query($query) {
