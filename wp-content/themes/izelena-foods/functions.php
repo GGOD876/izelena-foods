@@ -13,10 +13,181 @@ function izelena_setup() {
 add_action('after_setup_theme', 'izelena_setup');
 
 function izelena_assets() {
-    wp_enqueue_style('izelena-style', get_stylesheet_uri(), array(), '4.1.1');
-    wp_enqueue_script('izelena-interactions', get_template_directory_uri() . '/assets/theme.js', array(), '4.1.1', true);
+    wp_enqueue_style('izelena-style', get_stylesheet_uri(), array(), '4.2.0');
+    wp_enqueue_script('izelena-interactions', get_template_directory_uri() . '/assets/theme.js', array(), '4.2.0', true);
+    wp_localize_script('izelena-interactions', 'izelenaConfig', array(
+        'ajaxUrl' => admin_url('admin-ajax.php'),
+        'contactNonce' => wp_create_nonce('izelena_contact_submit'),
+    ));
 }
 add_action('wp_enqueue_scripts', 'izelena_assets');
+
+function izelena_register_contact_submission() {
+    register_post_type('izelena_submission', array(
+        'labels' => array(
+            'name' => __('Contact submissions', 'izelena-foods'),
+            'singular_name' => __('Contact submission', 'izelena-foods'),
+            'menu_name' => __('Contact submissions', 'izelena-foods'),
+            'view_item' => __('View submission', 'izelena-foods'),
+            'search_items' => __('Search submissions', 'izelena-foods'),
+            'not_found' => __('No submissions found.', 'izelena-foods'),
+        ),
+        'public' => false,
+        'publicly_queryable' => false,
+        'exclude_from_search' => true,
+        'show_ui' => true,
+        'show_in_menu' => true,
+        'show_in_rest' => false,
+        'has_archive' => false,
+        'rewrite' => false,
+        'query_var' => false,
+        'supports' => array('title', 'editor'),
+        'capability_type' => 'post',
+        'map_meta_cap' => true,
+        'menu_icon' => 'dashicons-email-alt',
+    ));
+}
+add_action('init', 'izelena_register_contact_submission');
+
+function izelena_contact_submission_columns($columns) {
+    return array(
+        'cb' => isset($columns['cb']) ? $columns['cb'] : '<input type="checkbox" />',
+        'title' => __('Submission', 'izelena-foods'),
+        'izelena_email' => __('Email', 'izelena-foods'),
+        'izelena_enquiry' => __('Enquiry type', 'izelena-foods'),
+        'date' => isset($columns['date']) ? $columns['date'] : __('Date', 'izelena-foods'),
+    );
+}
+add_filter('manage_izelena_submission_posts_columns', 'izelena_contact_submission_columns');
+
+function izelena_contact_submission_column($column, $post_id) {
+    if ('izelena_email' === $column) {
+        echo esc_html(get_post_meta($post_id, '_izelena_contact_email', true));
+    }
+    if ('izelena_enquiry' === $column) {
+        echo esc_html(get_post_meta($post_id, '_izelena_contact_enquiry', true));
+    }
+}
+add_action('manage_izelena_submission_posts_custom_column', 'izelena_contact_submission_column', 10, 2);
+
+function izelena_contact_submission_meta_box() {
+    add_meta_box(
+        'izelena_contact_details',
+        __('Contact details', 'izelena-foods'),
+        'izelena_contact_submission_meta_box_html',
+        'izelena_submission',
+        'side',
+        'high'
+    );
+}
+add_action('add_meta_boxes_izelena_submission', 'izelena_contact_submission_meta_box');
+
+function izelena_contact_submission_meta_box_html($post) {
+    $fields = array(
+        'Name' => '_izelena_contact_name',
+        'Email' => '_izelena_contact_email',
+        'Phone' => '_izelena_contact_phone',
+        'Enquiry type' => '_izelena_contact_enquiry',
+        'Consent' => '_izelena_contact_consent',
+        'Mail attempt' => '_izelena_contact_mail_status',
+    );
+    echo '<dl class="izelena-contact-details">';
+    foreach ($fields as $label => $meta_key) {
+        echo '<dt>' . esc_html($label) . '</dt><dd>' . esc_html(get_post_meta($post->ID, $meta_key, true)) . '</dd>';
+    }
+    echo '</dl><p>' . esc_html__('The message is stored in the main editor above. Submissions are private and are not publicly queryable.', 'izelena-foods') . '</p>';
+}
+
+function izelena_contact_error($code, $message) {
+    return new WP_Error($code, $message);
+}
+
+function izelena_contact_submission_data() {
+    if (!isset($_POST['izelena_contact_nonce']) || !wp_verify_nonce(sanitize_text_field(wp_unslash($_POST['izelena_contact_nonce'])), 'izelena_contact_submit')) {
+        return izelena_contact_error('invalid_nonce', __('Security check failed. Please refresh and try again.', 'izelena-foods'));
+    }
+
+    $honeypot = isset($_POST['website']) ? trim((string) wp_unslash($_POST['website'])) : '';
+    if ('' !== $honeypot) {
+        return izelena_contact_error('spam', __('We could not submit your message. Please try again.', 'izelena-foods'));
+    }
+
+    $name = isset($_POST['name']) ? sanitize_text_field(wp_unslash($_POST['name'])) : '';
+    $email = isset($_POST['email']) ? sanitize_email(wp_unslash($_POST['email'])) : '';
+    $phone = isset($_POST['phone']) ? sanitize_text_field(wp_unslash($_POST['phone'])) : '';
+    $enquiry = isset($_POST['enquiry']) ? sanitize_key(wp_unslash($_POST['enquiry'])) : '';
+    $message = isset($_POST['message']) ? sanitize_textarea_field(wp_unslash($_POST['message'])) : '';
+    $consent = isset($_POST['consent']) && '1' === (string) wp_unslash($_POST['consent']);
+    $allowed_enquiries = array('general', 'retail', 'wholesale', 'stockist');
+
+    if ('' === $name || '' === $message || !is_email($email) || !$consent || !in_array($enquiry, $allowed_enquiries, true)) {
+        return izelena_contact_error('invalid_fields', __('Please complete the required fields and consent before sending your message.', 'izelena-foods'));
+    }
+
+    return array(
+        'name' => $name,
+        'email' => $email,
+        'phone' => $phone,
+        'enquiry' => $enquiry,
+        'message' => $message,
+        'consent' => '1',
+    );
+}
+
+function izelena_store_contact_submission($data) {
+    $post_id = wp_insert_post(array(
+        'post_type' => 'izelena_submission',
+        'post_status' => 'private',
+        'post_title' => sprintf(/* translators: %1$s is the sender name, %2$s is the submission time. */ __('%1$s — %2$s', 'izelena-foods'), $data['name'], current_time('mysql')),
+        'post_content' => $data['message'],
+        'post_author' => get_current_user_id(),
+    ), true);
+    if (is_wp_error($post_id)) return $post_id;
+
+    foreach (array('name', 'email', 'phone', 'enquiry', 'consent') as $field) {
+        update_post_meta($post_id, '_izelena_contact_' . $field, $data[$field]);
+    }
+
+    $recipient = get_theme_mod('izelena_email', get_option('admin_email'));
+    $recipient = is_email($recipient) ? $recipient : get_option('admin_email');
+    $subject = sprintf(__('New Izelena contact enquiry: %s', 'izelena-foods'), $data['name']);
+    $body = "Name: {$data['name']}\nEmail: {$data['email']}\nPhone: {$data['phone']}\nEnquiry type: {$data['enquiry']}\n\nMessage:\n{$data['message']}";
+    $headers = array('Content-Type: text/plain; charset=UTF-8', 'Reply-To: ' . $data['email']);
+    $mail_sent = wp_mail($recipient, $subject, $body, $headers);
+    update_post_meta($post_id, '_izelena_contact_mail_status', $mail_sent ? 'attempted' : 'failed');
+    update_post_meta($post_id, '_izelena_contact_mail_attempted_at', current_time('mysql'));
+
+    return $post_id;
+}
+
+function izelena_contact_redirect_response($success, $message) {
+    $requested_redirect = isset($_POST['redirect_to']) ? esc_url_raw(wp_unslash($_POST['redirect_to'])) : wp_get_referer();
+    $redirect = wp_validate_redirect($requested_redirect, home_url('/contact/'));
+    $redirect = add_query_arg('contact_status', $success ? 'success' : 'error', $redirect);
+    if (!$success) $redirect = add_query_arg('contact_message', $message, $redirect);
+    wp_safe_redirect($redirect);
+    exit;
+}
+
+function izelena_contact_submit_admin_post() {
+    $data = izelena_contact_submission_data();
+    if (is_wp_error($data)) izelena_contact_redirect_response(false, $data->get_error_message());
+    $stored = izelena_store_contact_submission($data);
+    if (is_wp_error($stored)) izelena_contact_redirect_response(false, __('We could not save your message. Please try again.', 'izelena-foods'));
+    izelena_contact_redirect_response(true, __('Message received.', 'izelena-foods'));
+}
+add_action('admin_post_izelena_contact_submit', 'izelena_contact_submit_admin_post');
+add_action('admin_post_nopriv_izelena_contact_submit', 'izelena_contact_submit_admin_post');
+
+function izelena_contact_submit_ajax() {
+    $data = izelena_contact_submission_data();
+    if (is_wp_error($data)) wp_send_json_error(array('message' => $data->get_error_message()), 400);
+    $stored = izelena_store_contact_submission($data);
+    if (is_wp_error($stored)) wp_send_json_error(array('message' => __('We could not save your message. Please try again.', 'izelena-foods')), 500);
+    wp_send_json_success(array('message' => __('Message received. Thanks for reaching out. We will be in touch soon.', 'izelena-foods')));
+}
+add_action('wp_ajax_izelena_contact_submit', 'izelena_contact_submit_ajax');
+add_action('wp_ajax_nopriv_izelena_contact_submit', 'izelena_contact_submit_ajax');
 
 function izelena_sanitize_text($value) { return sanitize_text_field($value); }
 function izelena_sanitize_textarea($value) { return sanitize_textarea_field($value); }

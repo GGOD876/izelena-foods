@@ -82,6 +82,56 @@
     if (close) close.focus();
   }
 
+  function resetContactForm(form) {
+    form.reset();
+    form.classList.remove('is-success');
+    form.querySelectorAll('label, form > button').forEach(function (field) { field.hidden = false; });
+    var feedback = form.querySelector('[data-contact-feedback]');
+    if (feedback) {
+      feedback.hidden = true;
+      feedback.className = 'contact-feedback';
+      feedback.textContent = '';
+    }
+  }
+
+  function showContactFeedback(form, message, success) {
+    var feedback = form.querySelector('[data-contact-feedback]');
+    if (!feedback) return;
+    feedback.hidden = false;
+    if (success) {
+      form.classList.add('is-success');
+      form.querySelectorAll('label, form > button').forEach(function (field) { field.hidden = true; });
+      feedback.className = 'success contact-feedback';
+      feedback.innerHTML = '<span aria-hidden="true">✓</span><h2>Message received.</h2><p>' + escapeHtml(message) + '</p><button type="button" class="text-btn" data-contact-reset>Send another <span aria-hidden="true">↗</span></button>';
+    } else {
+      feedback.className = 'contact-feedback contact-feedback-error';
+      feedback.textContent = message;
+    }
+  }
+
+  document.addEventListener('submit', function (event) {
+    var form = event.target.closest('[data-contact-form]');
+    if (!form || !window.izelenaConfig || !window.izelenaConfig.ajaxUrl) return;
+    event.preventDefault();
+    var submit = form.querySelector('button[type="submit"]');
+    if (submit) submit.disabled = true;
+    var payload = new FormData(form);
+    payload.set('action', 'izelena_contact_submit');
+    if (window.izelenaConfig.contactNonce) payload.set('izelena_contact_nonce', window.izelenaConfig.contactNonce);
+    fetch(window.izelenaConfig.ajaxUrl, { method: 'POST', credentials: 'same-origin', body: payload })
+      .then(function (response) {
+        return response.json().then(function (body) {
+          if (!response.ok || !body.success) throw new Error(body.data && body.data.message ? body.data.message : 'We could not submit your message. Please try again.');
+          return body;
+        });
+      })
+      .then(function (body) { showContactFeedback(form, body.data.message, true); })
+      .catch(function (error) {
+        showContactFeedback(form, error.message, false);
+        if (submit) submit.disabled = false;
+      });
+  });
+
   function openCart(trigger) {
     var overlay = document.createElement('div');
     overlay.className = 'overlay';
@@ -108,6 +158,12 @@
   }
 
   document.addEventListener('click', function (event) {
+    var contactReset = event.target.closest('[data-contact-reset]');
+    if (contactReset) {
+      resetContactForm(contactReset.closest('[data-contact-form]'));
+      return;
+    }
+
     var toggle = event.target.closest('.menu-toggle');
     if (toggle) {
       var nav = document.querySelector('.site-nav');
