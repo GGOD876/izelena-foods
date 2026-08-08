@@ -15,8 +15,14 @@
 
   function updateCount() {
     document.querySelectorAll('.cart span').forEach(function (count) {
-      count.textContent = cart.length;
+      count.textContent = totalCartItems();
     });
+  }
+
+  function totalCartItems() {
+    return cart.reduce(function (total, item) {
+      return total + Number(item.quantity || 1);
+    }, 0);
   }
 
   function productFromCard(card) {
@@ -35,11 +41,22 @@
   }
 
   function addProduct(product) {
-    cart.push({
+    var next = {
+      id: product.id || '',
       name: product.name || 'Izelena flavour',
       price: Number(product.price || 0),
-      tone: product.tone || 'red'
+      tone: product.tone || 'red',
+      quantity: 1
+    };
+    var existing = cart.find(function (item) {
+      if (next.id && item.id) return String(item.id) === String(next.id);
+      return item.name === next.name && Number(item.price || 0) === next.price && item.tone === next.tone;
     });
+    if (existing) {
+      existing.quantity = Number(existing.quantity || 1) + 1;
+    } else {
+      cart.push(next);
+    }
     updateCount();
     if (document.querySelector('.drawer')) renderCart();
   }
@@ -52,16 +69,18 @@
 
   function cartMarkup() {
     var lines = cart.map(function (item, index) {
-      return '<div class="cart-line"><div class="mini ' + escapeHtml(item.tone) + '">' + escapeHtml(item.name.charAt(0)) + '</div><div><b>' + escapeHtml(item.name) + '</b><span>' + money(item.price) + '</span></div><button type="button" data-remove-cart="' + index + '">Remove</button></div>';
+      var quantity = Number(item.quantity || 1);
+      var subtotal = Number(item.price || 0) * quantity;
+      return '<div class="cart-line"><div class="mini ' + escapeHtml(item.tone) + '">' + escapeHtml(item.name.charAt(0)) + '</div><div><b>' + escapeHtml(item.name) + '</b><span>Unit price ' + money(item.price) + '</span><span class="cart-quantity">Quantity ' + quantity + '</span><strong class="cart-subtotal">Line subtotal ' + money(subtotal) + '</strong></div><button type="button" data-remove-cart="' + index + '">Remove</button></div>';
     }).join('');
     if (!cart.length) return '<div class="empty"><p>Your cart is waiting for a little island flavour.</p></div>';
-    return lines + '<div class="cart-total"><span>Estimated total</span><strong>' + money(cart.reduce(function (total, item) { return total + Number(item.price || 0); }, 0)) + '</strong></div><button class="btn primary full" type="button" disabled title="Checkout will be enabled when payment is connected">Checkout coming soon</button>';
+    return lines + '<div class="cart-total"><span>Estimated total</span><strong>' + money(cart.reduce(function (total, item) { return total + Number(item.price || 0) * Number(item.quantity || 1); }, 0)) + '</strong></div><button class="btn primary full" type="button" disabled title="Checkout will be enabled when payment is connected">Checkout coming soon</button>';
   }
 
   function renderCart() {
     var drawer = document.querySelector('.drawer');
     if (!drawer) return;
-    drawer.querySelector('h2').innerHTML = 'Cart <em>(' + cart.length + ')</em>';
+    drawer.querySelector('h2').innerHTML = 'Cart <em>(' + totalCartItems() + ')</em>';
     var content = drawer.querySelector('[data-cart-content]');
     if (content) content.innerHTML = cartMarkup();
     updateCount();
@@ -138,7 +157,7 @@
     overlay.setAttribute('role', 'dialog');
     overlay.setAttribute('aria-modal', 'true');
     overlay.setAttribute('aria-label', 'Shopping cart');
-    overlay.innerHTML = '<aside class="drawer"><button class="close" type="button" aria-label="Close shopping cart">&times;</button><p class="eyebrow">Your selection</p><h2>Cart <em>(' + cart.length + ')</em></h2><div data-cart-content>' + cartMarkup() + '</div></aside>';
+    overlay.innerHTML = '<aside class="drawer"><button class="close" type="button" aria-label="Close shopping cart">&times;</button><p class="eyebrow">Your selection</p><h2>Cart <em>(' + totalCartItems() + ')</em></h2><div data-cart-content>' + cartMarkup() + '</div></aside>';
     prepareOverlay(overlay, trigger);
   }
 
@@ -218,6 +237,7 @@
     var detailAdd = event.target.closest('[data-detail-add]');
     if (detailAdd) {
       addProduct({
+        id: detailAdd.getAttribute('data-product-id') || '',
         name: detailAdd.getAttribute('data-product-name') || 'Izelena flavour',
         price: detailAdd.getAttribute('data-product-price') || 0,
         tone: detailAdd.getAttribute('data-product-tone') || 'red'

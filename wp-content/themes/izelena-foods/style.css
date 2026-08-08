@@ -260,3 +260,13 @@ footer {
 .contact-form [hidden] {
   display: none !important;
 }
+
+.cart-quantity {
+  font-weight: 800;
+  color: var(--ink) !important;
+}
+
+.cart-subtotal {
+  font-size: 12px;
+  margin-top: 2px;
+}
