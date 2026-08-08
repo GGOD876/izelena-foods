@@ -6,6 +6,11 @@ DB_USER="${WORDPRESS_DB_USER:-wordpress}"
 DB_PASSWORD="${WORDPRESS_DB_PASSWORD:-change-me}"
 ROOT_PASSWORD="${MARIADB_ROOT_PASSWORD:-change-me-root}"
 PORT_NUMBER="${PORT:-10000}"
+SITE_URL="${WORDPRESS_SITE_URL:-http://localhost:${PORT_NUMBER}}"
+SITE_TITLE="${WORDPRESS_SITE_TITLE:-Izelena Foods}"
+ADMIN_USER="${WORDPRESS_ADMIN_USER:-izelena-admin}"
+ADMIN_PASSWORD="${WORDPRESS_ADMIN_PASSWORD:-}"
+ADMIN_EMAIL="${WORDPRESS_ADMIN_EMAIL:-info@izelenafoods.com}"
 
 if [ ! -d /var/lib/mysql/mysql ]; then
   mariadb-install-db --user=mysql --datadir=/var/lib/mysql >/dev/null
@@ -34,4 +39,28 @@ export WORDPRESS_DB_PASSWORD="$DB_PASSWORD"
 sed -ri "s/^Listen 80$/Listen ${PORT_NUMBER}/" /etc/apache2/ports.conf
 find /etc/apache2/sites-enabled -type f -exec sed -ri "s/<VirtualHost \*:80>/<VirtualHost *:${PORT_NUMBER}>/" {} +
 
-exec /usr/local/bin/docker-entrypoint.sh apache2-foreground
+/usr/local/bin/docker-entrypoint.sh apache2-foreground &
+APACHE_PID=$!
+
+for attempt in $(seq 1 60); do
+  if [ -f /var/www/html/wp-config.php ]; then break; fi
+  sleep 1
+done
+
+if [ -n "$ADMIN_PASSWORD" ] && ! wp core is-installed --allow-root --path=/var/www/html >/dev/null 2>&1; then
+  wp core install \
+    --url="$SITE_URL" \
+    --title="$SITE_TITLE" \
+    --admin_user="$ADMIN_USER" \
+    --admin_password="$ADMIN_PASSWORD" \
+    --admin_email="$ADMIN_EMAIL" \
+    --skip-email \
+    --allow-root \
+    --path=/var/www/html
+fi
+
+if wp core is-installed --allow-root --path=/var/www/html >/dev/null 2>&1; then
+  wp theme activate izelena-foods --allow-root --path=/var/www/html >/dev/null 2>&1 || true
+fi
+
+wait "$APACHE_PID"

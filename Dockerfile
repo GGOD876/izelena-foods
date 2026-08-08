@@ -1,7 +1,9 @@
 FROM wordpress:6.8-php8.3-apache
 
 RUN apt-get update \
-    && DEBIAN_FRONTEND=noninteractive apt-get install -y --no-install-recommends mariadb-server mariadb-client \
+    && DEBIAN_FRONTEND=noninteractive apt-get install -y --no-install-recommends curl mariadb-server mariadb-client \
+    && curl -fsSL https://raw.githubusercontent.com/wp-cli/builds/gh-pages/phar/wp-cli.phar -o /usr/local/bin/wp \
+    && chmod +x /usr/local/bin/wp \
     && rm -rf /var/lib/apt/lists/*
 
 COPY wp-content/themes/izelena-foods /usr/src/wordpress/wp-content/themes/izelena-foods
