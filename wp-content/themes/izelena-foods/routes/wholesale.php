@@ -1,0 +1,3 @@
+<?php if (!defined('ABSPATH')) exit; get_header(); ?>
+<main class="page wholesale-page"><div class="page-intro"><p class="eyebrow">For the people who feed people</p><h1>Bring Izelena<br><em>to your shelves.</em></h1><p>Retailer, restaurant, distributor or just flavour-curious? Let's talk.</p></div><div class="callout"><h2>Let's make room for more flavour.</h2><p>We partner with stockists, restaurants and distributors who believe every table deserves a little Jamaican spirit.</p><a class="btn yellow" href="<?php echo esc_url(home_url('/contact/')); ?>">Start a wholesale enquiry <span aria-hidden="true">↗</span></a></div></main>
+<?php get_footer(); ?>

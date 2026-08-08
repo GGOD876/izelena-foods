@@ -1,0 +1,1 @@
+<?php get_header(); ?><div class="wrap page content"><?php while(have_posts()):the_post(); ?><p class="eyebrow">Izelena Journal</p><h1 class="page-title"><?php the_title(); ?></h1><?php the_content(); endwhile; ?></div><?php get_footer(); ?>

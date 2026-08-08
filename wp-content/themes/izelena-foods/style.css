@@ -1,0 +1,216 @@
+:root{--ink:#11110f;--red:#dc2329;--yellow:#ffdf1f;--green:#9dcd35;--gold:#f4a21a;--cream:#fff8eb;--line:rgba(17,17,15,.16);font-family:Arial,Helvetica,sans-serif;color:var(--ink);background:var(--cream);font-synthesis:none}*{box-sizing:border-box}body{margin:0;background:var(--cream);line-height:1.55}button,input,select,textarea{font:inherit}button{cursor:pointer;border:0;background:none;color:inherit}button:focus-visible,input:focus-visible,select:focus-visible,textarea:focus-visible{outline:3px solid var(--red);outline-offset:3px}.announcement{background:var(--ink);color:#fff;padding:9px 5vw;text-align:center;text-transform:uppercase;letter-spacing:.14em;font-size:10px;font-weight:700}.announcement span{color:var(--yellow);padding:0 14px}.nav{height:84px;border-bottom:1px solid var(--line);display:flex;align-items:center;justify-content:space-between;padding:0 5vw;position:relative;background:var(--cream);z-index:3}.brand img{width:126px;height:auto;display:block}.nav nav{display:flex;align-items:center;gap:28px;font-size:13px;font-weight:700}.nav nav button:hover,.footer-bottom button:hover,.text-btn:hover{color:var(--red)}.cart{border:1px solid var(--ink);border-radius:99px;padding:10px 16px}.cart span{background:var(--red);color:#fff;border-radius:50%;font-size:10px;margin-left:4px;padding:2px 6px}.menu-toggle{display:none}.hero{max-width:1400px;margin:auto;display:grid;grid-template-columns:1fr 1fr;min-height:650px;padding:76px 5vw 68px;gap:40px}.hero-copy{align-self:center;max-width:590px}.eyebrow{text-transform:uppercase;letter-spacing:.15em;font-size:10px;font-weight:800;margin:0 0 15px;color:#5e5b50}.hero h1,.page-intro h1{font-size:clamp(3.6rem,7vw,7rem);line-height:.93;letter-spacing:-.075em;margin:0 0 28px;font-weight:900}.hero h1 em,.page-intro h1 em,h2 em{font-style:italic;color:var(--red)}.lede{font-size:18px;line-height:1.6;max-width:500px}.actions{display:flex;align-items:center;gap:26px;margin:34px 0}.btn{display:inline-flex;align-items:center;justify-content:center;gap:18px;padding:14px 20px;text-transform:uppercase;letter-spacing:.1em;font-size:10px;font-weight:800;border-radius:0;transition:.2s}.btn:hover{transform:translateY(-2px)}.btn.primary{background:var(--red);color:#fff}.btn.dark{background:var(--ink);color:#fff}.btn.yellow{background:var(--yellow);color:var(--ink)}.btn span{font-size:18px;line-height:0}.text-btn{font-weight:800;font-size:12px;border-bottom:1px solid var(--ink);padding:0 0 5px}.text-btn span{font-size:16px;margin-left:8px}.hero-proof{display:flex;gap:18px;font-size:10px;text-transform:uppercase;letter-spacing:.1em;font-weight:700;margin-top:75px}.hero-proof span:before{content:'✳';color:var(--red);margin-right:7px}.hero-art{background:var(--red);min-height:510px;position:relative;overflow:hidden;display:flex;align-items:flex-end;justify-content:center;background-image:linear-gradient(130deg,transparent 50%,rgba(255,223,31,.9) 50%)}.hero-art:after{content:'';position:absolute;inset:0;background:url('/wp-content/themes/izelena-foods/assets/izelena-tile.png') center/340px;opacity:.12;mix-blend-mode:multiply}.hero-art img{height:88%;width:auto;position:relative;z-index:1;filter:drop-shadow(12px 12px 0 rgba(17,17,15,.18))}.burst{position:absolute;z-index:2;top:30px;left:30px;background:var(--yellow);padding:18px;border-radius:50%;text-align:center;font-size:13px;line-height:1.1;transform:rotate(-8deg);width:105px;height:105px;display:grid;place-content:center}.burst b{font-size:17px}.tile-label{position:absolute;right:22px;bottom:22px;z-index:2;text-align:right;font-size:10px;letter-spacing:.2em;font-weight:900}.marquee{background:var(--yellow);padding:13px 5vw;display:flex;justify-content:space-between;text-transform:uppercase;letter-spacing:.12em;font-size:11px;font-weight:900}.marquee span:nth-child(even){color:var(--red)}.section{padding:112px 5vw;max-width:1400px;margin:auto}.section-head{display:flex;justify-content:space-between;align-items:end;margin-bottom:42px}.section h2,.scotch h2,.story-tease h2,.wholesale h2{font-size:clamp(2.5rem,5vw,5rem);letter-spacing:-.06em;line-height:.98;margin:0}.product-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:16px}.product-card{background:#fff;border:1px solid var(--line);min-width:0;transition:.25s}.product-card:hover{transform:translateY(-5px);box-shadow:8px 8px 0 rgba(17,17,15,.08)}.product-visual{height:220px;position:relative;display:grid;place-items:center;overflow:hidden}.product-visual:after{content:'';width:165px;height:220px;border-radius:50% 50% 45% 45%;background:rgba(255,255,255,.46);position:absolute;transform:rotate(18deg);opacity:.4}.product-card.gold .product-visual{background:var(--gold)}.product-card.red .product-visual{background:var(--red)}.product-card.yellow .product-visual{background:var(--yellow)}.product-card.green .product-visual{background:var(--green)}.product-card.burgundy .product-visual{background:#8a2637}.product-card.black .product-visual{background:var(--ink);color:#fff}.product-mark{font-size:52px;font-weight:900;letter-spacing:-.1em;position:relative;z-index:1}.heat-pill,.soon{position:absolute;z-index:2;top:14px;left:14px;text-transform:uppercase;font-size:9px;font-weight:900;letter-spacing:.1em;border:1px solid currentColor;padding:5px 8px}.soon{left:auto;right:14px;background:var(--yellow);border:0}.product-info{padding:22px}.product-info h3{font-size:23px;line-height:1;margin:0 0 10px;letter-spacing:-.04em}.product-info p:not(.eyebrow){color:#5e5b50;font-size:13px;min-height:60px;margin:0}.product-row{border-top:1px solid var(--line);margin-top:18px;padding-top:14px;display:flex;justify-content:space-between;align-items:center;font-size:13px}.add-btn{font-weight:900;font-size:12px}.add-btn span{color:var(--red);font-size:20px;vertical-align:-2px;margin-left:5px}.add-btn:disabled{opacity:.45}.scotch{background:var(--ink);color:#fff;padding:100px 5vw;display:grid;grid-template-columns:35% 1fr;gap:8%;align-items:center}.scotch .eyebrow{color:var(--yellow)}.scotch p{color:#bbb6a8;max-width:360px}.scotch h2{margin-bottom:25px}.heat-levels{display:grid;grid-template-columns:repeat(3,1fr);gap:2px}.heat-levels>div{padding:24px 22px;background:#252521;min-height:230px}.heat-levels>div:nth-child(2){background:var(--red)}.heat-levels b{font-size:11px;color:var(--yellow)}.peppers{display:block;font-size:25px;margin:34px 0 10px;letter-spacing:5px}.heat-levels h3{font-size:18px;margin:0}.heat-levels p{font-size:12px;margin-top:7px}.story-tease{display:grid;grid-template-columns:1fr 1fr;max-width:1200px;margin:110px auto;padding:0 5vw;align-items:center;gap:12%}.story-image{height:400px;background:var(--yellow);display:flex;justify-content:center;align-items:end;overflow:hidden;background-image:url('/wp-content/themes/izelena-foods/assets/izelena-tile.png');background-size:300px;opacity:.95}.story-image img{height:88%;filter:drop-shadow(9px 7px 0 rgba(220,35,41,.35))}.story-tease h2{margin-bottom:22px}.story-tease p:not(.eyebrow){max-width:500px;color:#5e5b50}.wholesale{background:var(--green);padding:90px 5vw;text-align:center;background-image:url('/wp-content/themes/izelena-foods/assets/izelena-tile.png');background-size:320px}.wholesale h2{margin-bottom:18px}.wholesale p:not(.eyebrow){margin-bottom:28px}.page{max-width:1400px;margin:auto;padding:90px 5vw 120px}.page-intro{max-width:900px;margin-bottom:65px}.page-intro h1{font-size:clamp(3.6rem,7vw,7rem);margin-bottom:24px}.page-intro>p:last-child{font-size:18px;max-width:550px;color:#5e5b50}.shop-toolbar{border-top:1px solid var(--line);border-bottom:1px solid var(--line);padding:16px 0;margin-bottom:30px;display:flex;justify-content:space-between;align-items:center}.filters{display:flex;gap:5px}.filters button{padding:8px 14px;text-transform:uppercase;font-size:10px;letter-spacing:.1em;font-weight:800}.filters button.active{background:var(--ink);color:#fff}.shop-toolbar label{font-size:11px;text-transform:uppercase;font-weight:800;letter-spacing:.08em}.shop-toolbar select{border:0;background:transparent;font-weight:800;margin-left:8px}.archive{grid-template-columns:repeat(3,1fr)}.story-page{padding-bottom:80px}.story-intro{display:grid;grid-template-columns:1fr 1fr;gap:12%;align-items:center}.story-portrait{background:var(--yellow);min-height:520px;display:flex;justify-content:center;align-items:end;overflow:hidden;background-image:url('/wp-content/themes/izelena-foods/assets/izelena-tile.png');background-size:300px}.story-portrait img{height:92%;max-width:85%;object-fit:contain}.story-intro h2,.contact-details h2{font-size:clamp(2.5rem,4vw,4.5rem);line-height:1;letter-spacing:-.06em;margin:0 0 22px}.story-intro p:not(.eyebrow){color:#5e5b50;max-width:500px}.values{display:grid;grid-template-columns:repeat(3,1fr);margin-top:90px;border-top:1px solid var(--line)}.values>div{padding:24px;border-right:1px solid var(--line)}.values>div:last-child{border:0}.values b{color:var(--red)}.values h3{font-size:24px;margin:24px 0 8px}.values p{color:#5e5b50;margin:0}.contact-grid{display:grid;grid-template-columns:1fr 1.2fr;gap:15%;align-items:start}.contact-details{border-top:2px solid var(--ink);padding-top:20px}.contact-details p:not(.eyebrow){font-size:16px;color:#5e5b50;margin:25px 0}.contact-details a{color:var(--red);font-weight:800}.contact-grid form{background:#fff;padding:34px;display:grid;gap:18px;border:1px solid var(--line)}.contact-grid label{display:grid;gap:7px;font-size:10px;text-transform:uppercase;letter-spacing:.1em;font-weight:800}.contact-grid input,.contact-grid select,.contact-grid textarea{border:0;border-bottom:1px solid var(--line);padding:10px 0;background:transparent;resize:vertical;outline:0}.contact-grid input:focus,.contact-grid select:focus,.contact-grid textarea:focus{border-color:var(--red)}.check{display:flex!important;grid-template-columns:auto 1fr;align-items:center;gap:10px!important;text-transform:none!important;letter-spacing:0!important;font-weight:400!important;font-size:12px!important}.check input{width:16px;height:16px}.success{text-align:center;padding:50px 20px}.success>span{display:grid;place-items:center;margin:0 auto 18px;width:48px;height:48px;background:var(--green);border-radius:50%;font-size:24px}.success h2{font-size:32px;letter-spacing:-.05em;margin:0}.success p{color:#5e5b50}.success .text-btn{margin-top:15px}footer{background:var(--ink);color:#fff;padding:55px 5vw 24px}.footer-top{display:grid;grid-template-columns:1fr 1fr 1fr;align-items:center;gap:25px;padding-bottom:55px;border-bottom:1px solid rgba(255,255,255,.18)}.footer-top img{width:140px;filter:brightness(0) invert(1)}.footer-top p{font-size:22px;line-height:1.1;margin:0}.footer-top .btn{justify-self:end}.footer-bottom{padding-top:20px;display:flex;justify-content:space-between;color:#aaa69b;font-size:10px;text-transform:uppercase;letter-spacing:.08em}.footer-bottom div{display:flex;gap:20px}.footer-bottom button{color:#aaa69b;font-size:10px;text-transform:uppercase}.overlay{position:fixed;z-index:10;inset:0;background:rgba(17,17,15,.58);display:flex;justify-content:flex-end}.drawer{height:100%;width:min(440px,100%);background:var(--cream);padding:45px 32px;position:relative;overflow:auto}.drawer h2{font-size:52px;letter-spacing:-.07em;margin:0 0 30px}.drawer h2 em{font-size:25px;font-style:normal}.close{position:absolute;right:22px;top:18px;font-size:30px}.empty{padding:45px 0;border-top:1px solid var(--line);color:#5e5b50}.cart-line{display:grid;grid-template-columns:52px 1fr auto;gap:14px;align-items:center;border-top:1px solid var(--line);padding:14px 0}.mini{height:52px;display:grid;place-items:center;font-weight:900}.mini.gold{background:var(--gold)}.mini.red{background:var(--red);color:#fff}.mini.yellow{background:var(--yellow)}.mini.green{background:var(--green)}.mini.burgundy{background:#8a2637;color:#fff}.mini.black{background:var(--ink);color:#fff}.cart-line div:nth-child(2){display:grid;font-size:13px}.cart-line span{color:#5e5b50;font-size:12px}.cart-line>button{font-size:10px;text-decoration:underline}.cart-total{display:flex;justify-content:space-between;border-top:2px solid var(--ink);padding:18px 0;margin-top:22px}.full{width:100%}.modal{background:var(--cream);width:min(700px,92%);padding:32px;align-self:center;display:grid;grid-template-columns:1fr 1fr;gap:30px;position:relative}.modal-art{min-height:330px;display:grid;place-items:center}.modal-art.gold{background:var(--gold)}.modal-art.red{background:var(--red);color:#fff}.modal-art.yellow{background:var(--yellow)}.modal-art.green{background:var(--green)}.modal-art.burgundy{background:#8a2637;color:#fff}.modal-art.black{background:var(--ink);color:#fff}.modal-art span{font-size:80px;font-weight:900}.modal h2{font-size:45px;line-height:.95;letter-spacing:-.07em;margin:6px 0 20px}.modal p:not(.eyebrow){color:#5e5b50}.modal-price{display:block;margin:25px 0;font-size:18px}
+@media(max-width:900px){.hero{grid-template-columns:1fr;padding-top:52px}.hero-art{min-height:420px}.hero-proof{margin-top:45px}.product-grid{grid-template-columns:repeat(2,1fr)}.scotch{grid-template-columns:1fr;gap:45px}.story-tease,.story-intro,.contact-grid{grid-template-columns:1fr;gap:45px}.story-image,.story-portrait{min-height:390px}.footer-top{grid-template-columns:1fr 1fr}.footer-top .btn{justify-self:start}.footer-bottom{gap:15px;flex-wrap:wrap}.archive{grid-template-columns:repeat(2,1fr)}}
+@media(max-width:620px){.announcement{font-size:8px}.nav{height:72px}.brand img{width:105px}.menu-toggle{display:block;text-transform:uppercase;font-size:10px;font-weight:800;letter-spacing:.1em}.nav nav{display:none;position:absolute;left:0;right:0;top:72px;background:var(--cream);padding:18px 5vw;border-bottom:1px solid var(--line);flex-direction:column;align-items:flex-start;gap:18px}.nav nav.open{display:flex}.hero{padding:48px 5vw 42px;min-height:0}.hero h1,.page-intro h1{font-size:16vw}.lede{font-size:16px}.actions{align-items:flex-start;flex-direction:column;gap:18px}.hero-art{min-height:350px}.hero-art img{height:86%}.hero-proof{flex-wrap:wrap;gap:10px;font-size:8px;margin-top:36px}.marquee{font-size:8px;gap:12px;overflow:hidden;white-space:nowrap}.section,.page{padding:72px 5vw}.section-head{align-items:start;gap:20px;flex-direction:column}.section h2,.scotch h2,.story-tease h2,.wholesale h2{font-size:14vw}.product-grid,.archive{grid-template-columns:1fr}.product-visual{height:240px}.heat-levels{grid-template-columns:1fr}.heat-levels>div{min-height:0}.scotch{padding:72px 5vw}.story-image{height:330px}.values{grid-template-columns:1fr}.values>div{border-right:0;border-bottom:1px solid var(--line)}.contact-grid form{padding:22px}.footer-top{grid-template-columns:1fr;gap:24px}.footer-top .btn{justify-self:start}.footer-bottom{font-size:8px}.footer-bottom div{gap:10px}.footer-bottom button{font-size:8px}.modal{grid-template-columns:1fr;padding:20px}.modal-art{min-height:220px}.modal h2{font-size:38px}}
+
+/* WordPress component adapters: the approved prototype uses the same visual components, with server links in place of React buttons. */
+.nav nav a{display:inline-block}
+.nav nav a:hover{color:var(--red)}
+.product-card h3 a{color:inherit}
+.heat-levels>a,.heat-levels>button{display:block;padding:24px 22px;background:#252521;min-height:230px;color:inherit;text-align:left}
+.heat-levels>a:nth-child(2),.heat-levels>button:nth-child(2){background:var(--red)}
+.heat-levels>a:hover,.heat-levels>button:hover{filter:brightness(1.08)}
+.filters a{padding:8px 14px;text-transform:uppercase;font-size:10px;letter-spacing:.1em;font-weight:800}
+.filters a.active{background:var(--ink);color:#fff}
+.footer-bottom a{color:#aaa69b;font-size:10px;text-transform:uppercase}
+.footer-bottom a:hover{color:var(--red)}
+.site-footer{background:var(--ink)}
+.content{max-width:none}
+.callout{padding:24px;border:1px solid var(--line);background:#fff;color:#5e5b50}
+.contact-page .page-intro>p:last-child{font-size:18px;max-width:550px;color:#5e5b50}
+.product-detail{display:grid;grid-template-columns:1fr 1fr;gap:10%;align-items:start}
+.product-detail .product-visual{height:420px}
+.product-detail h1{font-size:clamp(3.6rem,7vw,7rem);line-height:.93;letter-spacing:-.075em;margin:0 0 24px}
+.product-detail p{color:#5e5b50;max-width:500px}
+.product-detail .product-meta{display:block;margin:24px 0;font-size:18px;color:var(--ink)}
+.product-detail label{display:grid;gap:7px;font-size:10px;text-transform:uppercase;letter-spacing:.1em;font-weight:800}
+.product-detail select{border:0;border-bottom:1px solid var(--line);padding:10px 0;background:transparent}
+@media(max-width:620px){.product-detail{grid-template-columns:1fr;gap:30px}.product-detail .product-visual{height:300px}.footer-bottom a{font-size:8px}}
+/* Prototype parity corrections: server-rendered links retain the prototype's control styling. */
+a,a:visited{color:inherit;text-decoration:none}
+.nav nav>a:not(.cart){color:var(--ink);text-decoration:none}
+.nav nav>a:not(.cart):hover{color:var(--red)}
+.nav nav>button{color:var(--ink)}
+.heat-levels>a,.heat-levels>button{display:block;box-sizing:border-box;padding:2px 6px;min-height:0;border:0;border-radius:0;background:#252521;color:inherit;text-align:left;text-decoration:none;font:inherit;cursor:pointer}
+.heat-levels>a:nth-child(2),.heat-levels>button:nth-child(2){background:var(--red)}
+.heat-levels>a:hover,.heat-levels>button:hover{filter:brightness(1.08)}
+@media(max-width:620px){
+  .nav nav>a:not(.cart),.nav nav>button:not(.cart){line-height:1.55;padding:0;color:var(--ink)}
+  .nav nav>.cart{display:inline-flex;align-items:center;min-height:42px;padding:10px 16px;border:1px solid var(--ink);border-radius:99px;color:var(--ink)}
+  .heat-levels>a,.heat-levels>button{padding:2px 6px;min-height:0}
+}
+
+/* Authoritative parity overrides. Keep these selectors aligned with the
+ * server-rendered anchor markup in front-page.php. */
+.site-nav a,.site-nav a:visited{color:var(--ink);text-decoration:none}
+.site-nav a:hover{color:var(--red)}
+.heat-levels>a{display:block;box-sizing:border-box;height:193.63px;min-height:0;padding:2px 6px;overflow:hidden;color:inherit;background:#252521;text-align:left;text-decoration:none;font:inherit}
+.heat-levels>a:nth-child(2){background:var(--red)}
+@media(max-width:620px){
+  .heat-levels>a{height:175.03px;min-height:0;padding:2px 6px}
+}
+
+/* Final component geometry correction from independent parity review. */
+a{color:inherit;text-decoration:none}
+@media(min-width:621px){
+  .heat-levels>a,.heat-levels>button{min-height:193.63px!important}
+  footer{padding-bottom:26px!important}
+}
+@media(max-width:620px){
+  .heat-levels>a,.heat-levels>button{min-height:175.03px!important}
+  .nav nav{padding-bottom:26px!important}
+  footer{padding-bottom:26px!important}
+}
+
+/* Responsive contract: selectors are scoped to the server-rendered theme markup.
+ * Keep this block last so WordPress/plugin styles cannot change the mobile contract. */
+@media (max-width: 620px) {
+  .site-header .menu-toggle {
+    display: block;
+  }
+
+  .site-header .site-nav {
+    display: none;
+    position: absolute;
+    left: 0;
+    right: 0;
+    top: 72px;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 18px;
+    padding: 18px 5vw 26px;
+    background: var(--cream);
+    border-bottom: 1px solid var(--line);
+  }
+
+  .site-header .site-nav.open {
+    display: flex;
+  }
+
+  .site-header .site-nav > a {
+    color: var(--ink);
+    text-decoration: none;
+  }
+
+  .site-header .site-nav > a.cart {
+    display: inline-flex;
+    align-items: center;
+    min-height: 42px;
+    padding: 10px 16px;
+    border: 1px solid var(--ink);
+    border-radius: 99px;
+  }
+
+  .scotch .heat-levels {
+    grid-template-columns: 1fr;
+  }
+
+  .scotch .heat-levels > a {
+    display: block;
+    box-sizing: border-box;
+    height: 175.03px;
+    min-height: 0;
+    overflow: hidden;
+    padding: 2px 6px;
+    color: inherit;
+    text-decoration: none;
+  }
+
+  /* Keep the shop controls inside the viewport when the toolbar wraps. */
+  .shop-toolbar {
+    flex-wrap: wrap;
+    gap: 14px;
+    min-width: 0;
+  }
+
+  .shop-toolbar .filters {
+    flex: 1 1 100%;
+    flex-wrap: wrap;
+    min-width: 0;
+    max-width: 100%;
+  }
+
+  .shop-toolbar .filters a {
+    box-sizing: border-box;
+    max-width: 100%;
+  }
+
+  .shop-toolbar > label {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    flex: 1 1 100%;
+    min-width: 0;
+    max-width: 100%;
+  }
+
+  .shop-toolbar > label select {
+    box-sizing: border-box;
+    flex: 1 1 auto;
+    min-width: 0;
+    max-width: 100%;
+    width: 100%;
+  }
+}
+
+/* Final feedback pass: match prototype header/footer rhythm while keeping
+ * the preferred WordPress Scotchimeter card structure. */
+.site-header {
+  height: 84px;
+}
+
+footer {
+  padding-bottom: 24px !important;
+}
+
+.site-header .site-brand img {
+  width: 126px;
+}
+
+.footer-bottom a {
+  display: inline-block;
+  padding: 1px 6px;
+  line-height: 1.55;
+  color: #aaa69b;
+  text-decoration: none;
+}
+
+.scotch .heat-levels > a:nth-child(1) {
+  background: #56564d;
+  color: #fff;
+}
+
+.scotch .heat-levels > a:nth-child(2) {
+  background: #dc2329;
+  color: #fff;
+}
+
+.scotch .heat-levels > a:nth-child(3) {
+  background: #050505;
+  color: #fff;
+}
+
+@media (max-width: 620px) {
+  .site-header {
+    height: 72px;
+  }
+
+  footer {
+    padding-bottom: 24px !important;
+  }
+
+  .site-header .site-brand img {
+    width: 105px;
+  }
+
+  .footer-bottom a {
+    padding: 1px 6px;
+    font-size: 8px;
+  }
+}
+
+/* Match the prototype's desktop primary-nav hit-area spacing. */
+@media (min-width: 621px) {
+  .site-header .site-nav > a:not(.cart) {
+    padding: 1px 6px;
+  }
+}

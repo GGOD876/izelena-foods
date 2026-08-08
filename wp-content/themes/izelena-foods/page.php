@@ -1,0 +1,1 @@
+<?php get_header(); ?><main class="page content"><div class="page-intro"><p class="eyebrow">Izelena Foods</p><h1><?php the_title(); ?></h1></div><?php while (have_posts()) : the_post(); the_content(); endwhile; ?></main><?php get_footer(); ?>

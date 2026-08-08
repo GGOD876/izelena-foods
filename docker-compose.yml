@@ -1,0 +1,54 @@
+services:
+  db:
+    image: mariadb:11.4
+    restart: unless-stopped
+    environment:
+      MARIADB_DATABASE: ${WORDPRESS_DB_NAME:-wordpress}
+      MARIADB_USER: ${WORDPRESS_DB_USER:-wordpress}
+      MARIADB_PASSWORD: ${WORDPRESS_DB_PASSWORD:-change-me}
+      MARIADB_ROOT_PASSWORD: ${MARIADB_ROOT_PASSWORD:-change-me-root}
+    volumes:
+      - db_data:/var/lib/mysql
+    healthcheck:
+      test: ["CMD-SHELL", "healthcheck.sh --connect --innodb_initialized"]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+
+  wordpress:
+    image: wordpress:6.8-php8.3-apache
+    restart: unless-stopped
+    depends_on:
+      db:
+        condition: service_healthy
+    ports:
+      - "${WORDPRESS_PORT:-8080}:80"
+    environment:
+      WORDPRESS_DB_HOST: db:3306
+      WORDPRESS_DB_NAME: ${WORDPRESS_DB_NAME:-wordpress}
+      WORDPRESS_DB_USER: ${WORDPRESS_DB_USER:-wordpress}
+      WORDPRESS_DB_PASSWORD: ${WORDPRESS_DB_PASSWORD:-change-me}
+      WORDPRESS_DEBUG: ${WORDPRESS_DEBUG:-1}
+    volumes:
+      - wordpress_data:/var/www/html
+      - ./wp-content/themes:/var/www/html/wp-content/themes
+      - ./wordpress.htaccess:/var/www/html/.htaccess
+
+  phpmyadmin:
+    image: phpmyadmin:5.2-apache
+    profiles: ["tools"]
+    restart: unless-stopped
+    depends_on:
+      db:
+        condition: service_healthy
+    ports:
+      - "${PHPMYADMIN_PORT:-8081}:80"
+    environment:
+      PMA_HOST: db
+      PMA_PORT: 3306
+      PMA_USER: ${WORDPRESS_DB_USER:-wordpress}
+      PMA_PASSWORD: ${WORDPRESS_DB_PASSWORD:-change-me}
+
+volumes:
+  db_data:
+  wordpress_data:

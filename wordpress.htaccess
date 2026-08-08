@@ -1,0 +1,11 @@
+# Local Docker WordPress rewrite rules for the Izelena theme.
+<IfModule mod_rewrite.c>
+RewriteEngine On
+RewriteBase /
+RewriteRule ^index\.php$ - [L]
+RewriteRule ^(our-story|contact|shop|wholesale)/?$ /index.php?izelena_route=$1 [QSA,L]
+RewriteRule ^product/([^/]+)/?$ /index.php?izelena_product_route=$1 [QSA,L]
+RewriteCond %{REQUEST_FILENAME} !-f
+RewriteCond %{REQUEST_FILENAME} !-d
+RewriteRule . /index.php [L]
+</IfModule>

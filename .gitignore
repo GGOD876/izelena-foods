@@ -1,0 +1,13 @@
+.env
+wp-content/uploads/
+wp-content/cache/
+wp-content/upgrade/
+wp-content/backup-*
+*.log
+.DS_Store
+Thumbs.db
+node_modules/
+dist/
+.tmp-pdf/
+wp-content/themes/twentytwenty*/
+Sales Catalogue.pdf
