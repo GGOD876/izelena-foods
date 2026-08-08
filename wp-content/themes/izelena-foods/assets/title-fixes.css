@@ -19,6 +19,126 @@
   object-fit: contain;
 }
 
+/* Catalogue-led home hero: keep each supplied page intact and place controls
+ * in a separate rail so no catalogue typography is covered. */
+.hero-art {
+  min-height: 0;
+  padding: 16px;
+  display: block;
+  background: var(--ink);
+  background-image: linear-gradient(135deg, #23221d, #11110f);
+}
+
+.hero-art:after {
+  display: none;
+}
+
+.hero-carousel {
+  width: 100%;
+  height: 100%;
+  display: grid;
+  gap: 12px;
+}
+
+.hero-carousel-viewport {
+  width: 100%;
+  aspect-ratio: 1320 / 1020;
+  overflow: hidden;
+  background: #211f1a;
+}
+
+.hero-carousel-track {
+  display: flex;
+  width: 100%;
+  height: 100%;
+  transition: transform .45s ease;
+  will-change: transform;
+}
+
+.hero-slide {
+  flex: 0 0 100%;
+  width: 100%;
+  height: 100%;
+  min-width: 0;
+  margin: 0;
+  background: #211f1a;
+}
+
+.hero-carousel .hero-slide img {
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+  object-position: center;
+  filter: none;
+}
+
+.hero-carousel-controls {
+  display: grid;
+  grid-template-columns: 34px 48px 34px minmax(90px, 1fr) auto;
+  align-items: center;
+  gap: 10px;
+  min-height: 34px;
+  color: #fff;
+}
+
+.hero-carousel-arrow,
+.hero-carousel-toggle {
+  color: #fff;
+  font-size: 11px;
+  font-weight: 800;
+  letter-spacing: .08em;
+  text-transform: uppercase;
+}
+
+.hero-carousel-arrow {
+  width: 34px;
+  height: 34px;
+  border: 1px solid rgba(255,255,255,.48);
+  font-size: 17px;
+  line-height: 1;
+}
+
+.hero-carousel-arrow:hover,
+.hero-carousel-arrow:focus-visible,
+.hero-carousel-toggle:hover,
+.hero-carousel-toggle:focus-visible {
+  background: var(--yellow);
+  border-color: var(--yellow);
+  color: var(--ink);
+}
+
+.hero-carousel-status {
+  color: var(--yellow);
+  font-size: 10px;
+  font-weight: 900;
+  letter-spacing: .12em;
+  text-align: center;
+}
+
+.hero-carousel-indicators {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 7px;
+}
+
+.hero-carousel-indicators button {
+  width: 24px;
+  height: 3px;
+  padding: 0;
+  background: rgba(255,255,255,.34);
+}
+
+.hero-carousel-indicators button[aria-selected="true"] {
+  background: var(--yellow);
+}
+
+.hero-carousel-toggle {
+  border-bottom: 1px solid rgba(255,255,255,.6);
+  padding: 4px 0;
+}
+
 /* Keep the tile texture on the illustrated subject, not just behind it. */
 .hero-subject {
   position: relative;
@@ -86,7 +206,7 @@
 
 @media (max-width: 900px) {
   .hero-art {
-    min-height: 336px;
+    padding: 12px;
   }
 }
 
@@ -98,12 +218,34 @@
   }
 
   .hero-art {
-    min-height: 280px;
+    padding: 10px;
   }
 
   .hero-art img {
     width: 100%;
     height: 100%;
+  }
+
+  .hero-carousel-controls {
+    grid-template-columns: 32px 42px 32px minmax(78px, 1fr) auto;
+    gap: 7px;
+  }
+
+  .hero-carousel-arrow {
+    width: 32px;
+    height: 32px;
+  }
+
+  .hero-carousel-indicators {
+    gap: 5px;
+  }
+
+  .hero-carousel-indicators button {
+    width: 18px;
+  }
+
+  .hero-carousel-toggle {
+    font-size: 9px;
   }
 
   .hero-subject {
@@ -131,5 +273,11 @@
   .modal-content .eyebrow {
     max-width: 100%;
     padding-right: 24px;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .hero-carousel-track {
+    transition: none;
   }
 }

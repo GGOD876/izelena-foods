@@ -220,6 +220,97 @@
     }
   }
 
+  function initHeroCarousels() {
+    document.querySelectorAll('[data-hero-carousel]').forEach(function (carousel) {
+      var track = carousel.querySelector('.hero-carousel-track');
+      var slides = Array.prototype.slice.call(carousel.querySelectorAll('.hero-slide'));
+      var indicators = Array.prototype.slice.call(carousel.querySelectorAll('[data-carousel-indicator]'));
+      var currentLabel = carousel.querySelector('[data-carousel-current]');
+      var previous = carousel.querySelector('[data-carousel-prev]');
+      var next = carousel.querySelector('[data-carousel-next]');
+      var toggle = carousel.querySelector('[data-carousel-toggle]');
+      var index = 0;
+      var timer = null;
+      var paused = false;
+      var reducedMotion = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+      if (!track || slides.length < 1) return;
+
+      function stopAutoplay() {
+        if (timer) window.clearInterval(timer);
+        timer = null;
+      }
+
+      function startAutoplay() {
+        stopAutoplay();
+        if (paused || reducedMotion || slides.length < 2) return;
+        timer = window.setInterval(function () { goTo(index + 1, false); }, 7000);
+      }
+
+      function goTo(nextIndex, restartTimer) {
+        index = (nextIndex + slides.length) % slides.length;
+        track.style.transform = 'translate3d(-' + (index * 100) + '%, 0, 0)';
+        slides.forEach(function (slide, slideIndex) {
+          var active = slideIndex === index;
+          slide.classList.toggle('is-active', active);
+          slide.setAttribute('aria-hidden', String(!active));
+        });
+        indicators.forEach(function (indicator, indicatorIndex) {
+          var active = indicatorIndex === index;
+          indicator.setAttribute('aria-selected', String(active));
+          indicator.tabIndex = active ? 0 : -1;
+        });
+        if (currentLabel) currentLabel.textContent = String(index + 1).padStart(2, '0');
+        if (restartTimer && !paused) startAutoplay();
+      }
+
+      if (previous) previous.addEventListener('click', function () { goTo(index - 1, true); });
+      if (next) next.addEventListener('click', function () { goTo(index + 1, true); });
+      indicators.forEach(function (indicator) {
+        indicator.addEventListener('click', function () {
+          goTo(Number(indicator.getAttribute('data-carousel-indicator')) || 0, true);
+        });
+      });
+      if (toggle) {
+        toggle.addEventListener('click', function () {
+          paused = !paused;
+          toggle.textContent = paused ? 'Play' : 'Pause';
+          toggle.setAttribute('aria-pressed', String(paused));
+          if (paused) stopAutoplay();
+          else startAutoplay();
+        });
+      }
+      carousel.addEventListener('keydown', function (event) {
+        if (event.key === 'ArrowLeft') {
+          event.preventDefault();
+          goTo(index - 1, true);
+        } else if (event.key === 'ArrowRight') {
+          event.preventDefault();
+          goTo(index + 1, true);
+        } else if (event.key === 'Home') {
+          event.preventDefault();
+          goTo(0, true);
+        } else if (event.key === 'End') {
+          event.preventDefault();
+          goTo(slides.length - 1, true);
+        }
+      });
+      carousel.addEventListener('mouseenter', stopAutoplay);
+      carousel.addEventListener('mouseleave', startAutoplay);
+      carousel.addEventListener('focusin', stopAutoplay);
+      carousel.addEventListener('focusout', function (event) {
+        if (!carousel.contains(event.relatedTarget)) startAutoplay();
+      });
+      document.addEventListener('visibilitychange', function () {
+        if (document.hidden) stopAutoplay();
+        else startAutoplay();
+      });
+
+      goTo(0, false);
+      startAutoplay();
+    });
+  }
+
   document.addEventListener('submit', function (event) {
     var form = event.target.closest('[data-contact-form]');
     if (!form || !window.izelenaConfig || !window.izelenaConfig.ajaxUrl) return;
@@ -437,4 +528,6 @@
       openProductModal(trigger);
     }
   });
+
+  initHeroCarousels();
 }());

@@ -13,9 +13,9 @@ function izelena_setup() {
 add_action('after_setup_theme', 'izelena_setup');
 
 function izelena_assets() {
-    wp_enqueue_style('izelena-style', get_stylesheet_uri(), array(), '4.2.9');
-    wp_enqueue_style('izelena-title-fixes', get_template_directory_uri() . '/assets/title-fixes.css', array('izelena-style'), '4.2.9');
-    wp_enqueue_script('izelena-interactions', get_template_directory_uri() . '/assets/theme.js', array(), '4.2.5', true);
+    wp_enqueue_style('izelena-style', get_stylesheet_uri(), array(), '4.3.0');
+    wp_enqueue_style('izelena-title-fixes', get_template_directory_uri() . '/assets/title-fixes.css', array('izelena-style'), '4.3.0');
+    wp_enqueue_script('izelena-interactions', get_template_directory_uri() . '/assets/theme.js', array(), '4.2.6', true);
     wp_localize_script('izelena-interactions', 'izelenaConfig', array(
         'ajaxUrl' => admin_url('admin-ajax.php'),
         'contactNonce' => wp_create_nonce('izelena_contact_submit'),
