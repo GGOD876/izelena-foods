@@ -42,6 +42,8 @@ services:
       WOOCOMMERCE_CURRENCY: ${WOOCOMMERCE_CURRENCY:-JMD}
       WOOCOMMERCE_SEED: ${WOOCOMMERCE_SEED:-0}
       WOOCOMMERCE_SEED_CSV: ${WOOCOMMERCE_SEED_CSV:-/opt/izelena/scripts/sales-catalogue-import.csv}
+      WOOCOMMERCE_PUBLISH_SEED: ${WOOCOMMERCE_PUBLISH_SEED:-0}
+      WOOCOMMERCE_PUBLISH_SLUGS: ${WOOCOMMERCE_PUBLISH_SLUGS:-jerk-seasoning,jerk-bbq-sauce,mango-salsa,spicy-mango-salsa,sorrel-pepper-sauce}
     volumes:
       - wordpress_data:/var/www/html
       - ./wp-content/themes:/var/www/html/wp-content/themes

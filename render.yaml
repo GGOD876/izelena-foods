@@ -23,3 +23,15 @@ services:
         generateValue: true
       - key: WORDPRESS_ADMIN_EMAIL
         value: info@izelenafoods.com
+      - key: WOOCOMMERCE_INSTALL
+        value: "1"
+      - key: WOOCOMMERCE_VERSION
+        value: "11.0.0"
+      - key: WOOCOMMERCE_CURRENCY
+        value: JMD
+      - key: WOOCOMMERCE_SEED
+        value: "1"
+      - key: WOOCOMMERCE_PUBLISH_SEED
+        value: "1"
+      - key: WOOCOMMERCE_PUBLISH_SLUGS
+        value: jerk-seasoning,jerk-bbq-sauce,mango-salsa,spicy-mango-salsa,sorrel-pepper-sauce
