@@ -60,9 +60,9 @@ fi
 
 if wp core is-installed --allow-root --path=/var/www/html >/dev/null 2>&1; then
   wp theme activate izelena-foods --allow-root --path=/var/www/html >/dev/null 2>&1 || true
-  if [ "${WOOCOMMERCE_INSTALL:-0}" = "1" ]; then
-    : "${WOOCOMMERCE_VERSION:?Set WOOCOMMERCE_VERSION to the client-approved pinned WooCommerce version when WOOCOMMERCE_INSTALL=1}"
-    WP_PATH=/var/www/html WOOCOMMERCE_VERSION="$WOOCOMMERCE_VERSION" WOOCOMMERCE_CURRENCY="${WOOCOMMERCE_CURRENCY:-JMD}" /usr/local/bin/woocommerce-bootstrap.sh
+  if [ "${WOOCOMMERCE_INSTALL:-1}" = "1" ]; then
+    WOOCOMMERCE_VERSION="${WOOCOMMERCE_VERSION:-11.0.0}" \
+      WP_PATH=/var/www/html WOOCOMMERCE_CURRENCY="${WOOCOMMERCE_CURRENCY:-JMD}" /usr/local/bin/woocommerce-bootstrap.sh
   fi
 fi
 

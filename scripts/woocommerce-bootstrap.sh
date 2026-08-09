@@ -23,10 +23,10 @@ wp option update woocommerce_currency "${WOOCOMMERCE_CURRENCY:-JMD}"
 wp rewrite flush --hard
 
 echo "WooCommerce $WOOCOMMERCE_VERSION is installed and active."
-if [ "${WOOCOMMERCE_SEED:-0}" = "1" ]; then
+if [ "${WOOCOMMERCE_SEED:-1}" = "1" ]; then
   SEED_CSV="${WOOCOMMERCE_SEED_CSV:-/opt/izelena/scripts/sales-catalogue-import.csv}" \
     WP_PATH="$WP_PATH" /opt/izelena/scripts/woocommerce-seed.sh
-  if [ "${WOOCOMMERCE_PUBLISH_SEED:-0}" = "1" ]; then
+  if [ "${WOOCOMMERCE_PUBLISH_SEED:-1}" = "1" ]; then
     IFS=',' read -ra publish_slugs <<< "${WOOCOMMERCE_PUBLISH_SLUGS:-}"
     for slug in "${publish_slugs[@]}"; do
       product_id="$(wp post list --post_type=product --name="$slug" --post_status=any --field=ID --format=ids | awk '{print $1}')"
