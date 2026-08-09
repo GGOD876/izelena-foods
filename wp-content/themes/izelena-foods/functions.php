@@ -459,12 +459,8 @@ function izelena_legacy_product_card($product, $fallback = false, $modal_trigger
         . ' data-product-image="' . esc_attr($image_url) . '"'
         . ' data-product-url="' . esc_url($url) . '"'
         . ' data-product-soon="' . ($soon ? '1' : '0') . '"';
-    if ($modal_trigger) {
-        echo '<div class="shop-product-trigger" role="button" tabindex="0" aria-label="' . esc_attr(sprintf(__('View %s', 'izelena-foods'), $name)) . '">';
-    }
     $visual_mark = $image ? $image : '<span class="product-mark">' . esc_html(strtoupper($initials)) . '</span>';
     echo '<article class="product-card ' . esc_attr($tone) . '"' . $metadata . '><div class="product-visual">' . $visual_mark . '<span class="heat-pill">' . esc_html($heat) . '</span>' . ($soon ? '<span class="soon">Coming soon</span>' : '') . '</div><div class="product-info"><p class="eyebrow">' . esc_html($tag) . '</p><h3><a href="' . esc_url($url) . '">' . esc_html($name) . '</a></h3><p>' . esc_html($desc) . '</p><div class="product-row"><strong>' . wp_kses_post($price) . '</strong>' . $action . '</div></div></article>';
-    if ($modal_trigger) echo '</div>';
 }
 
 function izelena_product_card($product, $fallback = false, $modal_trigger = false) {
@@ -528,10 +524,8 @@ function izelena_product_card($product, $fallback = false, $modal_trigger = fals
         . ' data-product-type="' . esc_attr($is_wc ? $product->get_type() : 'demo') . '"'
         . ' data-product-variations="' . esc_attr(wp_json_encode($variation_data)) . '"'
         . ' data-product-soon="' . ($soon ? '1' : '0') . '"';
-    if ($modal_trigger) echo '<div class="shop-product-trigger" role="button" tabindex="0" aria-label="' . esc_attr(sprintf(__('View %s', 'izelena-foods'), $name)) . '">';
     $visual_mark = $image ? $image : '<span class="product-mark">' . esc_html(strtoupper($initials)) . '</span>';
     echo '<article class="product-card ' . esc_attr($tone) . '"' . $metadata . '><div class="product-visual">' . $visual_mark . '<span class="heat-pill heat-pill-' . esc_attr($heat ?: 'pending') . '">' . esc_html($heat_label) . '</span>' . ($soon ? '<span class="soon">Coming soon</span>' : '') . '</div><div class="product-info"><p class="eyebrow">' . esc_html($tag) . '</p><h3><a href="' . esc_url($url) . '">' . esc_html($name) . '</a></h3><p>' . esc_html($desc) . '</p><div class="product-row"><strong>' . wp_kses_post($price) . '</strong>' . $action . '</div></div></article>';
-    if ($modal_trigger) echo '</div>';
 }
 
 function izelena_product_filter_query($query) {
