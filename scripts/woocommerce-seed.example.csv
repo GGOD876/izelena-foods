@@ -1,0 +1,2 @@
+product_slug,product_name,description,category,attribute_name,attribute_value,sku,regular_price,sale_price,stock_quantity,stock_status,heat_level,product_image_path,variation_image_path,tax_class,shipping_class,weight,length,width,height
+jerk-seasoning,Jerk Seasoning,"Approved customer-facing description",Seasonings,Size,10 oz,IZ-JERK-10,CLIENT_INPUT,CLIENT_INPUT,CLIENT_INPUT,CLIENT_INPUT,hot,/opt/izelena/product-images/jerk-seasoning.png,/opt/izelena/product-images/jerk-seasoning.png,standard,standard,CLIENT_INPUT,CLIENT_INPUT,CLIENT_INPUT,CLIENT_INPUT
