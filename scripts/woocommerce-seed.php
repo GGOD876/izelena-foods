@@ -30,11 +30,11 @@ function izelena_seed_baseline($path) {
 
 function izelena_seed_image_id($path, $parent_id) {
     $legacy_image_paths = array(
-        '17' => '/opt/izelena/product-images/jerk-seasoning.png',
-        '18' => '/opt/izelena/product-images/jerk-bbq-sauce.png',
-        '19' => '/opt/izelena/product-images/mango-salsa.png',
-        '20' => '/opt/izelena/product-images/spicy-mango-salsa.png',
-        '21' => '/opt/izelena/product-images/sorrel-pepper-sauce.png',
+        '17' => '/opt/izelena/product-images/jerk-seasoning.jpg',
+        '18' => '/opt/izelena/product-images/jerk-bbq-sauce.jpg',
+        '19' => '/opt/izelena/product-images/mango-salsa.jpg',
+        '20' => '/opt/izelena/product-images/spicy-mango-salsa.jpg',
+        '21' => '/opt/izelena/product-images/sorrel-pepper-sauce.jpg',
         '22' => '/opt/izelena/product-images/crushed-pepper-sauce-coming-soon.png',
     );
     if (isset($legacy_image_paths[(string) $path])) $path = $legacy_image_paths[(string) $path];
