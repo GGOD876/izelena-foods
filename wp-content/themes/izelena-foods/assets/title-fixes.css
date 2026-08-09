@@ -204,6 +204,25 @@
   padding-right: 56px;
 }
 
+/* Keep the Scotchimeter artwork visible even when plugin/reset styles remove
+ * intrinsic image sizing from the live SVG elements. */
+.scotch .peppers {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  min-height: 40px;
+  margin: 34px 0 10px;
+  letter-spacing: 0;
+}
+
+.scotch .peppers img {
+  display: block;
+  width: 32px;
+  height: 40px;
+  flex: 0 0 32px;
+  object-fit: contain;
+}
+
 @media (max-width: 900px) {
   .hero-art {
     padding: 12px;
@@ -279,5 +298,327 @@
 @media (prefers-reduced-motion: reduce) {
   .hero-carousel-track {
     transition: none;
+  }
+}
+
+/* Commerce card contract: each card owns its full height and the Woo image
+ * is contained inside the visual frame instead of being cropped by plugin CSS. */
+.product-grid .shop-product-trigger {
+  display: flex;
+  min-width: 0;
+  height: 100%;
+}
+
+.product-grid .product-card {
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+  height: 100%;
+}
+
+.product-grid .product-visual {
+  flex: 0 0 clamp(220px, 18vw, 260px);
+  min-height: 220px;
+}
+
+.product-grid .product-visual .product-image,
+.product-grid .product-visual .product-card-image {
+  position: relative;
+  z-index: 1;
+  display: block;
+  width: 100%;
+  height: 100%;
+  max-width: 100%;
+  min-width: 0;
+  min-height: 0;
+  padding: 16px;
+  object-fit: contain;
+  object-position: center;
+}
+
+.product-grid .product-info {
+  display: flex;
+  flex: 1 1 auto;
+  flex-direction: column;
+  min-width: 0;
+}
+
+.product-grid .product-info h3,
+.product-grid .product-info h3 a,
+.product-grid .product-info p:not(.eyebrow) {
+  overflow-wrap: anywhere;
+}
+
+.product-grid .product-info p:not(.eyebrow) {
+  flex: 1 1 auto;
+  min-height: 60px;
+  overflow: visible;
+}
+
+.product-grid .product-row {
+  margin-top: auto;
+}
+
+/* Product heat is also the visual card tone: mild green, medium yellow,
+ * hot red. Keep the badge inset and opaque so it remains readable over photos. */
+.product-grid .product-visual .heat-pill,
+.product-detail .product-visual .heat-pill {
+  top: 18px;
+  left: 18px;
+  padding: 7px 9px;
+  border: 1px solid currentColor;
+  background: var(--cream);
+  box-shadow: 3px 3px 0 rgba(17,17,15,.18);
+}
+
+.product-grid .heat-pill-mild,
+.product-detail .heat-pill-mild {
+  background: var(--green) !important;
+  color: var(--ink) !important;
+}
+
+.product-grid .heat-pill-medium,
+.product-detail .heat-pill-medium {
+  background: var(--yellow) !important;
+  color: var(--ink) !important;
+}
+
+.product-grid .heat-pill-hot,
+.product-detail .heat-pill-hot {
+  background: var(--red) !important;
+  color: #fff !important;
+}
+
+.modal-art .heat-pill {
+  top: 18px;
+  left: 18px;
+  padding: 7px 9px;
+  font-size: 9px !important;
+  line-height: 1.1;
+  font-weight: 900;
+  letter-spacing: .1em;
+  text-transform: uppercase;
+  border: 1px solid currentColor;
+  background: var(--cream);
+  box-shadow: 3px 3px 0 rgba(17,17,15,.18);
+}
+
+.modal-art .heat-pill-mild {
+  background: var(--green) !important;
+  color: var(--ink) !important;
+}
+
+.modal-art .heat-pill-medium {
+  background: var(--yellow) !important;
+  color: var(--ink) !important;
+}
+
+.modal-art .heat-pill-hot {
+  background: var(--red) !important;
+  color: #fff !important;
+}
+
+/* Arrow controls share one visual weight instead of inheriting inconsistent
+ * inline text metrics from WooCommerce and the theme buttons. */
+.btn span[aria-hidden="true"],
+.text-btn span[aria-hidden="true"],
+.add-btn span[aria-hidden="true"] {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 1.2em;
+  min-width: 1.2em;
+  margin-left: 4px;
+  line-height: 1;
+  vertical-align: middle;
+}
+
+.btn span[aria-hidden="true"] {
+  font-size: 1.45em;
+  transform: translateY(-.04em);
+}
+
+.text-btn span[aria-hidden="true"] {
+  font-size: 1.15em;
+  margin-left: 7px;
+}
+
+.add-btn span[aria-hidden="true"] {
+  color: var(--red);
+  font-size: 1.35em;
+}
+
+.hero-carousel-arrow {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 0;
+  padding: 0;
+  font-size: 20px;
+  line-height: 1;
+}
+
+.hero-carousel-arrow:active,
+.hero-carousel-toggle:active,
+.quantity-controls button:active,
+.add-btn:active {
+  transform: translateY(1px);
+}
+
+.hero-carousel-indicators button {
+  min-height: 20px;
+  border: 0;
+  border-bottom: 3px solid rgba(255,255,255,.34);
+  background: transparent;
+}
+
+.hero-carousel-indicators button[aria-selected="true"] {
+  border-bottom-color: var(--yellow);
+  background: transparent;
+}
+
+.cart-line > div:nth-child(2) {
+  min-width: 0;
+}
+
+.cart-quantity {
+  color: var(--ink) !important;
+  font-weight: 800;
+}
+
+.cart-quantity b {
+  color: var(--red);
+}
+
+@media (max-width: 620px) {
+  .product-grid .product-visual {
+    flex-basis: 240px;
+  }
+
+  .hero-carousel-controls {
+    grid-template-columns: 36px 42px 36px minmax(0, 1fr) auto;
+  }
+}
+
+/* Product detail presentation: show the approved product image at its full
+ * intrinsic aspect ratio. This selector intentionally excludes shop cards and
+ * the quick-view modal. */
+.product-detail .product-visual {
+  isolation: isolate;
+  height: auto !important;
+  min-height: 420px;
+  overflow: visible;
+  padding: 24px;
+}
+
+.product-detail .product-visual::after {
+  display: none;
+}
+
+.product-detail .product-visual .product-detail-image {
+  position: relative;
+  z-index: 1;
+  display: block;
+  width: 100%;
+  height: auto;
+  max-width: 100%;
+  max-height: none;
+  object-fit: contain;
+  object-position: center;
+  transform: none;
+}
+
+/* Scotchimeter: use a consistent flame illustration. The number of flames
+ * maps directly to the three heat labels. */
+.scotch .heat-levels {
+  gap: 14px;
+}
+
+.scotch .heat-levels > a {
+  display: flex;
+  min-height: 278px !important;
+  height: auto !important;
+  flex-direction: column;
+  padding: 24px 18px 22px !important;
+  overflow: visible;
+}
+
+.scotch .heat-levels > a b {
+  font-size: 14px;
+  line-height: 1;
+}
+
+.scotch .heat-levels .heat-flames {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  min-height: 74px;
+  margin: 24px 0 18px;
+}
+
+.scotch .heat-levels .heat-flames img {
+  display: block;
+  width: 44px;
+  height: 55px;
+  flex: 0 0 44px;
+  object-fit: contain;
+}
+
+.scotch .heat-levels > a:nth-child(1) h3,
+.scotch .heat-levels > a:nth-child(1) p,
+.scotch .heat-levels > a:nth-child(1) b,
+.scotch .heat-levels > a:nth-child(2) h3,
+.scotch .heat-levels > a:nth-child(2) p,
+.scotch .heat-levels > a:nth-child(2) b {
+  color: var(--ink) !important;
+}
+
+.scotch .heat-levels > a:nth-child(3) h3,
+.scotch .heat-levels > a:nth-child(3) p,
+.scotch .heat-levels > a:nth-child(3) b {
+  color: #fff !important;
+}
+
+.scotch .heat-levels > a h3 {
+  margin: 0;
+  font-size: clamp(1.2rem, 1.8vw, 1.55rem);
+  line-height: 1;
+}
+
+.scotch .heat-levels > a p {
+  margin: 12px 0 0;
+  max-width: 18ch;
+  line-height: 1.4;
+}
+
+@media (max-width: 620px) {
+  .product-detail .product-visual {
+    min-height: 0;
+    padding: 18px;
+  }
+
+  .scotch .heat-levels {
+    gap: 12px;
+  }
+
+  .scotch .heat-levels > a {
+    min-height: 236px !important;
+    padding: 22px 20px 20px !important;
+  }
+
+  .scotch .heat-levels .heat-flames {
+    gap: 10px;
+    min-height: 74px;
+    margin: 20px 0 16px;
+  }
+
+  .scotch .heat-levels .heat-flames img {
+    width: 46px;
+    height: 58px;
+    flex-basis: 46px;
+  }
+
+  .scotch .heat-levels > a p {
+    max-width: 32ch;
   }
 }

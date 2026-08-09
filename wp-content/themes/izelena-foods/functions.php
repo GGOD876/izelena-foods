@@ -13,12 +13,26 @@ function izelena_setup() {
 add_action('after_setup_theme', 'izelena_setup');
 
 function izelena_assets() {
-    wp_enqueue_style('izelena-style', get_stylesheet_uri(), array(), '4.3.0');
-    wp_enqueue_style('izelena-title-fixes', get_template_directory_uri() . '/assets/title-fixes.css', array('izelena-style'), '4.3.0');
-    wp_enqueue_script('izelena-interactions', get_template_directory_uri() . '/assets/theme.js', array(), '4.2.6', true);
+    $theme_dir = get_template_directory();
+    $style_path = $theme_dir . '/style.css';
+    $fixes_path = $theme_dir . '/assets/title-fixes.css';
+    $script_path = $theme_dir . '/assets/theme.js';
+    $version = static function ($path) {
+        return file_exists($path) ? (string) filemtime($path) : '4.4.0';
+    };
+    wp_enqueue_style('izelena-style', get_stylesheet_uri(), array(), $version($style_path));
+    wp_enqueue_style('izelena-title-fixes', get_template_directory_uri() . '/assets/title-fixes.css', array('izelena-style'), $version($fixes_path));
+    wp_enqueue_script('izelena-interactions', get_template_directory_uri() . '/assets/theme.js', array(), $version($script_path), true);
     wp_localize_script('izelena-interactions', 'izelenaConfig', array(
         'ajaxUrl' => admin_url('admin-ajax.php'),
         'contactNonce' => wp_create_nonce('izelena_contact_submit'),
+        'cartNonce' => wp_create_nonce('izelena_cart'),
+        'woocommerce' => function_exists('WC') && class_exists('WooCommerce'),
+        'checkoutEnabled' => function_exists('izelena_checkout_enabled') && izelena_checkout_enabled(),
+        'demoMode' => function_exists('izelena_demo_mode') && izelena_demo_mode(),
+        'cartUrl' => function_exists('wc_get_cart_url') ? wc_get_cart_url() : home_url('/cart/'),
+        'shopUrl' => home_url('/shop/'),
+        'checkoutUrl' => function_exists('wc_get_checkout_url') ? wc_get_checkout_url() : home_url('/checkout/'),
     ));
 }
 add_action('wp_enqueue_scripts', 'izelena_assets');
@@ -218,6 +232,171 @@ function izelena_customizer($wp_customize) {
 }
 add_action('customize_register', 'izelena_customizer');
 
+/**
+ * WooCommerce is the authoritative catalogue and cart when it is available.
+ * The demo data below is retained only so the theme can still be previewed
+ * before WooCommerce is installed; it is never used as a production fallback.
+ */
+function izelena_woocommerce_active() {
+    return function_exists('WC') && class_exists('WooCommerce') && function_exists('wc_get_products');
+}
+
+function izelena_demo_mode() {
+    if (!defined('IZELENA_DEMO_MODE') || !IZELENA_DEMO_MODE) return false;
+    if (function_exists('wp_get_environment_type')) {
+        return in_array(wp_get_environment_type(), array('local', 'development', 'staging'), true);
+    }
+    return true;
+}
+
+function izelena_checkout_enabled() {
+    if (!izelena_woocommerce_active() || !function_exists('wc_get_checkout_url')) return false;
+    $gates = array('IZELENA_CHECKOUT_RELEASED', 'IZELENA_PAYMENT_READY', 'IZELENA_SHIPPING_READY', 'IZELENA_TAX_READY', 'IZELENA_EMAIL_READY', 'IZELENA_HOSTING_READY');
+    foreach ($gates as $gate) if (!defined($gate) || true !== constant($gate)) return false;
+    return true;
+}
+
+function izelena_checkout_gate_redirect() {
+    if (!is_admin() && function_exists('is_checkout') && is_checkout() && !izelena_checkout_enabled()) {
+        wp_safe_redirect(function_exists('wc_get_cart_url') ? wc_get_cart_url() : home_url('/shop/'));
+        exit;
+    }
+}
+add_action('template_redirect', 'izelena_checkout_gate_redirect', 5);
+
+function izelena_catalogue_products($args = array()) {
+    if (!izelena_woocommerce_active()) return izelena_demo_mode() ? izelena_demo_products() : array();
+    $defaults = array(
+        'status' => 'publish',
+        'limit' => -1,
+        'orderby' => 'menu_order',
+        'order' => 'ASC',
+        'return' => 'objects',
+    );
+    $products = wc_get_products(wp_parse_args($args, $defaults));
+    return is_array($products) ? $products : array();
+}
+
+function izelena_normalize_quantity($value, $allow_zero = false) {
+    $raw = is_scalar($value) ? trim((string) $value) : '';
+    if ('' === $raw || !preg_match('/^\d+$/', $raw)) return $allow_zero ? 0 : 1;
+    $quantity = min(999999, (int) $raw);
+    if (!$allow_zero) $quantity = max(1, $quantity);
+    return $quantity;
+}
+
+function izelena_product_description($product) {
+    if (!is_object($product) || !is_a($product, 'WC_Product')) return '';
+    $short = trim(wp_strip_all_tags((string) $product->get_short_description()));
+    if ('' !== $short) return $short;
+    $full = trim(wp_strip_all_tags((string) $product->get_description()));
+    return '' !== $full ? $full : __('Jamaican flavour for every season.', 'izelena-foods');
+}
+
+/**
+ * Return product price markup without assuming a particular WooCommerce
+ * helper exists in the installed runtime.
+ */
+function izelena_product_price_html($product) {
+    if (!is_object($product) || !is_a($product, 'WC_Product')) return '';
+    if (is_callable(array($product, 'get_price_html'))) return (string) $product->get_price_html();
+    if (function_exists('wc_get_price_html')) return (string) wc_get_price_html($product);
+    if (function_exists('wc_price')) {
+        $price = function_exists('wc_get_price_to_display')
+            ? wc_get_price_to_display($product)
+            : (float) $product->get_price();
+        return (string) wc_price($price);
+    }
+    $price = (float) $product->get_price();
+    return '' !== $product->get_price()
+        ? esc_html('J$' . number_format_i18n($price, 2))
+        : '';
+}
+
+/**
+ * WooCommerce owns the product photography. The local theme mapping remains
+ * only as a safe fallback for demo products or incomplete staging records.
+ */
+function izelena_approved_product_image($product, $size = 'large') {
+    if (is_object($product) && is_a($product, 'WC_Product')) {
+        $image_id = (int) $product->get_image_id();
+        if ($image_id) {
+            $woo_image = wp_get_attachment_image_url($image_id, $size);
+            if ($woo_image) return $woo_image;
+        }
+    }
+    $slug = is_object($product) && is_a($product, 'WC_Product')
+        ? sanitize_title($product->get_slug())
+        : sanitize_title((string) $product);
+    $mapping = array(
+        'jerk-seasoning' => 'heartbeat-of-jamaican-cooking-jerk-marinade.jpg',
+        'jerk-marinade' => 'heartbeat-of-jamaican-cooking-jerk-marinade.jpg',
+        'jerk-bbq' => 'sweet-heat-smoky-finish-bbq-jerk-sauce.jpg',
+        'jerk-bbq-sauce' => 'sweet-heat-smoky-finish-bbq-jerk-sauce.jpg',
+        'mango' => 'sweet-island-sunshine-mango-sauce.jpg',
+        'mango-salsa' => 'sweet-island-sunshine-mango-sauce.jpg',
+        'spicy-mango' => 'sweet-meets-fire-spicy-mango-sauce.jpg',
+        'spicy-mango-salsa' => 'sweet-meets-fire-spicy-mango-sauce.jpg',
+        'sorrel' => 'tangy-spicy-unforgettable-sorrel-pepper-sauce.jpg',
+        'sorrel-pepper-sauce' => 'tangy-spicy-unforgettable-sorrel-pepper-sauce.jpg',
+    );
+    if (!isset($mapping[$slug])) return '';
+    $file = get_template_directory() . '/assets/' . $mapping[$slug];
+    return file_exists($file) ? get_template_directory_uri() . '/assets/' . $mapping[$slug] : '';
+}
+
+function izelena_heat_icons($heat) {
+    $count = array('mild' => 1, 'medium' => 2, 'hot' => 3);
+    $level = isset($count[$heat]) ? $count[$heat] : 0;
+    if (!$level) return '<span class="heat-flames heat-flames-pending" aria-hidden="true">&mdash;</span>';
+    $icon = get_template_directory_uri() . '/assets/heat-flame.png';
+    $html = '<span class="heat-flames heat-flames-' . esc_attr($heat) . '" aria-hidden="true">';
+    for ($i = 0; $i < $level; $i++) $html .= '<img src="' . esc_url($icon) . '" width="44" height="55" alt="">';
+    return $html . '</span>';
+}
+
+function izelena_variation_attribute_label($attribute, $value = '') {
+    $taxonomy = str_replace('attribute_', '', (string) $attribute);
+    $label = function_exists('wc_attribute_label') ? wc_attribute_label($taxonomy) : ucwords(str_replace(array('pa_', '-', '_'), array('', ' ', ' '), $taxonomy));
+    if ($value && taxonomy_exists($taxonomy)) {
+        $term = get_term_by('slug', $value, $taxonomy);
+        if ($term && !is_wp_error($term)) $value = $term->name;
+    }
+    return array('label' => $label, 'value' => (string) $value);
+}
+
+function izelena_product_variation_data($product) {
+    if (!is_object($product) || !is_a($product, 'WC_Product') || !$product->is_type('variable')) return array();
+    $variations = array();
+    foreach ($product->get_children() as $variation_id) {
+        $variation = wc_get_product($variation_id);
+        if (!$variation || !$variation->exists()) continue;
+        $attributes = array();
+        $attribute_labels = array();
+        foreach ($variation->get_attributes() as $key => $value) {
+            $attribute_key = 0 === strpos((string) $key, 'attribute_') ? (string) $key : 'attribute_' . sanitize_title($key);
+            $formatted = izelena_variation_attribute_label($attribute_key, $value);
+            $attributes[$attribute_key] = (string) $value;
+            $attribute_labels[$attribute_key] = $formatted['value'];
+        }
+        $approved_image = $variation->get_image_id()
+            ? wp_get_attachment_image_url($variation->get_image_id(), 'large')
+            : izelena_approved_product_image($product);
+        $variations[] = array(
+            'id' => (int) $variation->get_id(),
+            'attributes' => $attributes,
+            'attribute_labels' => $attribute_labels,
+            'price' => (float) $variation->get_price(),
+            'price_html' => izelena_product_price_html($variation),
+            'in_stock' => $variation->is_in_stock(),
+            'purchasable' => $variation->is_purchasable(),
+            'variation_description' => wp_strip_all_tags($variation->get_description()),
+            'image' => $approved_image,
+        );
+    }
+    return $variations;
+}
+
 function izelena_demo_products() {
     return array(
         array('id' => 'jerk-seasoning', 'name' => 'Jerk Seasoning', 'tag' => 'The heartbeat of Jamaican cooking', 'desc' => 'An authentic jerk marinade bursting with pimento, thyme, scallion, and Scotch Bonnet heat.', 'price' => 900, 'heat' => 'medium', 'tone' => 'gold', 'note' => 'Sweet heat. Smoky finish.', 'image' => 'heartbeat-of-jamaican-cooking-jerk-marinade.jpg'),
@@ -231,10 +410,14 @@ function izelena_demo_products() {
 
 function izelena_product_heat($product_id) {
     $heat = get_post_meta($product_id, '_izelena_heat_level', true);
-    return in_array($heat, array('mild', 'medium', 'hot'), true) ? $heat : 'medium';
+    return in_array($heat, array('mild', 'medium', 'hot'), true) ? $heat : '';
 }
 
-function izelena_product_card($product, $fallback = false, $modal_trigger = false) {
+function izelena_heat_tone($heat) {
+    return array('mild' => 'green', 'medium' => 'yellow', 'hot' => 'red')[$heat] ?? 'red';
+}
+
+function izelena_legacy_product_card($product, $fallback = false, $modal_trigger = false) {
     $is_wc = !$fallback && is_object($product) && is_a($product, 'WC_Product');
     $soon = false;
     $image_url = '';
@@ -242,18 +425,18 @@ function izelena_product_card($product, $fallback = false, $modal_trigger = fals
         $id = (string) $product->get_id();
         $name = $product->get_name();
         $tag = 'Izelena flavour collection';
-        $desc = $product->get_short_description() ? wp_strip_all_tags($product->get_short_description()) : 'Jamaican flavour for every season.';
+        $desc = izelena_product_description($product);
         $heat = izelena_product_heat($product->get_id());
-        $tone = 'red';
+        $tone = izelena_heat_tone($heat);
         $url = $product->get_permalink();
-        $image = $product->get_image('woocommerce_thumbnail', array('class' => 'product-image'));
-        if ($product->get_image_id()) $image_url = wp_get_attachment_image_url($product->get_image_id(), 'large');
+        $image_url = izelena_approved_product_image($product);
+        $image = $image_url ? '<img class="product-card-image" src="' . esc_url($image_url) . '" alt="' . esc_attr($name . ' product') . '">' : '';
         $price = function_exists('wc_price') && '' !== $product->get_price() ? wc_price(wc_get_price_to_display($product), array('currency' => 'JMD')) : '';
         $action = '<a class="add-btn" href="' . esc_url($url) . '">View <span>↗</span></a>';
         if ($product->is_purchasable() && $product->is_in_stock() && $product->is_type('simple')) $action = '<a class="add-btn add_to_cart_button ajax_add_to_cart" href="' . esc_url($product->add_to_cart_url()) . '" data-product_id="' . esc_attr($product->get_id()) . '">Add <span>+</span></a>';
     } else {
         $id = $product['id'] ?? sanitize_title($product['name']);
-        $name = $product['name']; $tag = $product['tag']; $desc = $product['desc']; $heat = $product['heat']; $tone = $product['tone'];
+        $name = $product['name']; $tag = $product['tag']; $desc = $product['desc']; $heat = $product['heat']; $tone = izelena_heat_tone($heat);
         $image_file = $product['image'] ?? '';
         $image_url = $image_file ? get_template_directory_uri() . '/assets/' . $image_file : '';
         $image = $image_url ? '<img class="product-card-image" src="' . esc_url($image_url) . '" alt="' . esc_attr($name . ' product') . '">' : '';
@@ -284,6 +467,73 @@ function izelena_product_card($product, $fallback = false, $modal_trigger = fals
     if ($modal_trigger) echo '</div>';
 }
 
+function izelena_product_card($product, $fallback = false, $modal_trigger = false) {
+    $is_wc = !$fallback && is_object($product) && is_a($product, 'WC_Product');
+    $soon = false;
+    $image_url = '';
+    $variation_data = array();
+    if ($is_wc) {
+        $id = (string) $product->get_id();
+        $name = $product->get_name();
+        $tag = 'Izelena flavour collection';
+        $desc = izelena_product_description($product);
+        $heat = izelena_product_heat($product->get_id());
+        $tone = 'red';
+        $url = $product->get_permalink();
+        $image_url = izelena_approved_product_image($product);
+        $image = $image_url ? '<img class="product-card-image" src="' . esc_url($image_url) . '" alt="' . esc_attr($name . ' product') . '">' : '';
+        $price = izelena_product_price_html($product);
+        $variation_data = izelena_product_variation_data($product);
+        if ('' === trim(wp_strip_all_tags($price)) && $variation_data) {
+            $variation_prices = array_map('floatval', wp_list_pluck($variation_data, 'price'));
+            $variation_prices = array_filter($variation_prices, function ($value) { return $value > 0; });
+            if ($variation_prices) {
+                $minimum = min($variation_prices);
+                $minimum_html = function_exists('wc_price')
+                    ? wc_price($minimum)
+                    : esc_html('J$' . number_format_i18n($minimum, 2));
+                $price = sprintf(__('From %s', 'izelena-foods'), $minimum_html);
+            }
+        }
+        $action = '<a class="add-btn" href="' . esc_url($url) . '">View <span aria-hidden="true">&rarr;</span></a>';
+        if ($product->is_purchasable() && $product->is_in_stock() && $product->is_type('simple')) {
+            $action = '<button class="add-btn" type="button" data-wc-add data-product-id="' . esc_attr($product->get_id()) . '">Add <span aria-hidden="true">+</span></button>';
+        }
+        if (!$product->is_in_stock()) $action = '<button class="add-btn" type="button" disabled>Sold out</button>';
+    } else {
+        $id = $product['id'] ?? sanitize_title($product['name']);
+        $name = $product['name']; $tag = $product['tag']; $desc = $product['desc']; $heat = $product['heat']; $tone = $product['tone'];
+        $image_file = $product['image'] ?? '';
+        $image_url = $image_file ? get_template_directory_uri() . '/assets/' . $image_file : '';
+        $image = $image_url ? '<img class="product-card-image" src="' . esc_url($image_url) . '" alt="' . esc_attr($name . ' product') . '">' : '';
+        $soon = !empty($product['soon']);
+        $url = home_url('/product/' . sanitize_title($name) . '/');
+        $price = 'From J$' . number_format_i18n((float) $product['price']);
+        $action = $soon ? '<button class="add-btn" type="button" disabled>Soon <span aria-hidden="true">+</span></button>' : '<button class="add-btn" type="button" data-demo-add="' . esc_attr($id) . '">Add <span aria-hidden="true">+</span></button>';
+    }
+    $heat_label = $heat ? ucfirst($heat) : __('Heat pending approval', 'izelena-foods');
+    $initials = '';
+    foreach (preg_split('/\s+/', $name) as $word) $initials .= substr($word, 0, 1);
+    $numeric_price = $is_wc && '' !== $product->get_price() ? (float) $product->get_price() : ($is_wc ? 0 : (float) $product['price']);
+    $metadata = ' data-product-id="' . esc_attr($id) . '"'
+        . ' data-product-name="' . esc_attr($name) . '"'
+        . ' data-product-tag="' . esc_attr($tag) . '"'
+        . ' data-product-description="' . esc_attr($desc) . '"'
+        . ' data-product-price="' . esc_attr($numeric_price) . '"'
+        . ' data-product-heat="' . esc_attr($heat) . '"'
+        . ' data-product-tone="' . esc_attr($tone) . '"'
+        . ' data-product-initials="' . esc_attr(strtoupper($initials)) . '"'
+        . ' data-product-image="' . esc_attr($image_url) . '"'
+        . ' data-product-url="' . esc_url($url) . '"'
+        . ' data-product-type="' . esc_attr($is_wc ? $product->get_type() : 'demo') . '"'
+        . ' data-product-variations="' . esc_attr(wp_json_encode($variation_data)) . '"'
+        . ' data-product-soon="' . ($soon ? '1' : '0') . '"';
+    if ($modal_trigger) echo '<div class="shop-product-trigger" role="button" tabindex="0" aria-label="' . esc_attr(sprintf(__('View %s', 'izelena-foods'), $name)) . '">';
+    $visual_mark = $image ? $image : '<span class="product-mark">' . esc_html(strtoupper($initials)) . '</span>';
+    echo '<article class="product-card ' . esc_attr($tone) . '"' . $metadata . '><div class="product-visual">' . $visual_mark . '<span class="heat-pill heat-pill-' . esc_attr($heat ?: 'pending') . '">' . esc_html($heat_label) . '</span>' . ($soon ? '<span class="soon">Coming soon</span>' : '') . '</div><div class="product-info"><p class="eyebrow">' . esc_html($tag) . '</p><h3><a href="' . esc_url($url) . '">' . esc_html($name) . '</a></h3><p>' . esc_html($desc) . '</p><div class="product-row"><strong>' . wp_kses_post($price) . '</strong>' . $action . '</div></div></article>';
+    if ($modal_trigger) echo '</div>';
+}
+
 function izelena_product_filter_query($query) {
     if (is_admin() || !$query->is_main_query()) return;
     $heat = isset($_GET['heat']) ? sanitize_key(wp_unslash($_GET['heat'])) : '';
@@ -305,9 +555,94 @@ add_filter('woocommerce_product_query_meta_query', 'izelena_woo_product_meta_que
 
 function izelena_heat_meta_box() { add_meta_box('izelena_heat', __('Scotchimeter heat', 'izelena-foods'), 'izelena_heat_meta_box_html', 'product', 'side'); }
 add_action('add_meta_boxes', 'izelena_heat_meta_box');
-function izelena_heat_meta_box_html($post) { wp_nonce_field('izelena_heat_save', 'izelena_heat_nonce'); $current = izelena_product_heat($post->ID); echo '<label for="izelena_heat_level">' . esc_html__('Heat level', 'izelena-foods') . '</label><select name="izelena_heat_level" id="izelena_heat_level" style="width:100%"><option value="mild" ' . selected($current, 'mild', false) . '>Mild / Tups</option><option value="medium" ' . selected($current, 'medium', false) . '>Medium / Nuh 2 Much</option><option value="hot" ' . selected($current, 'hot', false) . '>Hot / Whole Heap</option></select>'; }
-function izelena_save_heat($post_id) { if (!isset($_POST['izelena_heat_nonce']) || !wp_verify_nonce(sanitize_text_field(wp_unslash($_POST['izelena_heat_nonce'])), 'izelena_heat_save') || (defined('DOING_AUTOSAVE') && DOING_AUTOSAVE) || !current_user_can('edit_post', $post_id)) return; $heat = isset($_POST['izelena_heat_level']) ? sanitize_key(wp_unslash($_POST['izelena_heat_level'])) : 'medium'; if (in_array($heat, array('mild', 'medium', 'hot'), true)) update_post_meta($post_id, '_izelena_heat_level', $heat); }
+function izelena_heat_meta_box_html($post) { wp_nonce_field('izelena_heat_save', 'izelena_heat_nonce'); $current = izelena_product_heat($post->ID); echo '<label for="izelena_heat_level">' . esc_html__('Heat level', 'izelena-foods') . '</label><select name="izelena_heat_level" id="izelena_heat_level" style="width:100%"><option value="" ' . selected($current, '', false) . '>Uncategorized - client input required</option><option value="mild" ' . selected($current, 'mild', false) . '>Mild / Tups</option><option value="medium" ' . selected($current, 'medium', false) . '>Medium / Nuh 2 Much</option><option value="hot" ' . selected($current, 'hot', false) . '>Hot / Whole Heap</option></select>'; }
+function izelena_save_heat($post_id) { if (!isset($_POST['izelena_heat_nonce']) || !wp_verify_nonce(sanitize_text_field(wp_unslash($_POST['izelena_heat_nonce'])), 'izelena_heat_save') || (defined('DOING_AUTOSAVE') && DOING_AUTOSAVE) || !current_user_can('edit_post', $post_id)) return; $heat = isset($_POST['izelena_heat_level']) ? sanitize_key(wp_unslash($_POST['izelena_heat_level'])) : ''; if (in_array($heat, array('mild', 'medium', 'hot'), true)) update_post_meta($post_id, '_izelena_heat_level', $heat); else delete_post_meta($post_id, '_izelena_heat_level'); }
 add_action('save_post_product', 'izelena_save_heat');
+
+function izelena_load_cart() {
+    if (!izelena_woocommerce_active()) return false;
+    if (function_exists('wc_load_cart')) wc_load_cart();
+    return function_exists('WC') && WC()->cart;
+}
+
+function izelena_cart_payload() {
+    if (!izelena_load_cart()) return array('enabled' => false, 'items' => array(), 'count' => 0, 'total_html' => '');
+    WC()->cart->calculate_totals();
+    $items = array();
+    foreach (WC()->cart->get_cart() as $cart_key => $cart_item) {
+        $product = isset($cart_item['data']) ? $cart_item['data'] : false;
+        if (!$product || !$product->exists()) continue;
+        $variation_text = array();
+        $formatted_data = wc_get_formatted_cart_item_data($cart_item, false);
+        if (is_array($formatted_data)) foreach ($formatted_data as $attribute) {
+            if (isset($attribute['key'], $attribute['value'])) $variation_text[] = wp_strip_all_tags($attribute['key'] . ': ' . $attribute['value']);
+        }
+        $product_id = isset($cart_item['product_id']) ? absint($cart_item['product_id']) : (int) $product->get_id();
+        $variation_id = isset($cart_item['variation_id']) ? absint($cart_item['variation_id']) : 0;
+        $items[] = array(
+            'key' => $cart_key,
+            'product_id' => $product_id,
+            'variation_id' => $variation_id,
+            'name' => $product->get_name(),
+            'quantity' => (int) $cart_item['quantity'],
+            'variation' => implode(' | ', $variation_text),
+            'price_html' => wc_price(wc_get_price_to_display($product)),
+            'subtotal_html' => wc_price((float) $cart_item['line_total'] + (float) $cart_item['line_tax']),
+            'image' => $product->get_image_id() ? wp_get_attachment_image_url($product->get_image_id(), 'thumbnail') : '',
+        );
+    }
+    return array(
+        'enabled' => true,
+        'items' => $items,
+        'count' => (int) WC()->cart->get_cart_contents_count(),
+        'total_html' => WC()->cart->get_total(),
+        'cart_url' => wc_get_cart_url(),
+        'checkout_url' => wc_get_checkout_url(),
+        'checkout_enabled' => izelena_checkout_enabled(),
+    );
+}
+
+function izelena_cart_ajax() {
+    if (!check_ajax_referer('izelena_cart', 'nonce', false)) wp_send_json_error(array('code' => 'invalid_nonce', 'message' => __('Security check failed. Please refresh and try again.', 'izelena-foods')), 403);
+    if (!izelena_load_cart()) wp_send_json_error(array('code' => 'woocommerce_unavailable', 'message' => __('WooCommerce is not active. Cart actions are unavailable.', 'izelena-foods')), 503);
+    $action = isset($_POST['cart_action']) ? sanitize_key(wp_unslash($_POST['cart_action'])) : 'get';
+    if ('add' === $action) {
+        $product_id = isset($_POST['product_id']) ? absint($_POST['product_id']) : 0;
+        $variation_id = isset($_POST['variation_id']) ? absint($_POST['variation_id']) : 0;
+        $quantity = isset($_POST['quantity']) ? izelena_normalize_quantity(wp_unslash($_POST['quantity'])) : 1;
+        if (!$product_id) wp_send_json_error(array('code' => 'invalid_product', 'message' => __('That product is not available.', 'izelena-foods')), 400);
+        $variation = array();
+        if (isset($_POST['variation']) && is_array($_POST['variation'])) {
+            foreach (wp_unslash($_POST['variation']) as $key => $value) {
+                $clean_key = sanitize_key($key);
+                if (0 !== strpos($clean_key, 'attribute_')) $clean_key = 'attribute_' . $clean_key;
+                if (!is_scalar($value)) continue;
+                $variation[$clean_key] = sanitize_title((string) $value);
+            }
+        }
+        $added = WC()->cart->add_to_cart($product_id, $quantity, $variation_id, $variation);
+        if (!$added) wp_send_json_error(array('code' => 'add_failed', 'message' => __('That size is unavailable. Please choose another variation.', 'izelena-foods')), 409);
+    } elseif ('update' === $action) {
+        $cart_key = isset($_POST['cart_key']) ? wc_clean(wp_unslash($_POST['cart_key'])) : '';
+        $quantity = isset($_POST['quantity']) ? izelena_normalize_quantity(wp_unslash($_POST['quantity'])) : 1;
+        $cart = WC()->cart->get_cart();
+        if (!$cart_key || !isset($cart[$cart_key])) wp_send_json_error(array('code' => 'missing_line', 'message' => __('That cart line is no longer available.', 'izelena-foods')), 404);
+        if (0 === $quantity) {
+            if (!WC()->cart->remove_cart_item($cart_key)) wp_send_json_error(array('code' => 'remove_failed', 'message' => __('That cart line could not be removed.', 'izelena-foods')), 409);
+        } elseif (false === WC()->cart->set_quantity($cart_key, $quantity, true)) {
+            wp_send_json_error(array('code' => 'quantity_unavailable', 'message' => __('That quantity is unavailable. Please review stock and try again.', 'izelena-foods')), 409);
+        }
+    } elseif ('remove' === $action) {
+        $cart_key = isset($_POST['cart_key']) ? wc_clean(wp_unslash($_POST['cart_key'])) : '';
+        if (!$cart_key) wp_send_json_error(array('code' => 'missing_line', 'message' => __('That cart line is no longer available.', 'izelena-foods')), 400);
+        if (!WC()->cart->remove_cart_item($cart_key)) wp_send_json_error(array('code' => 'remove_failed', 'message' => __('That cart line could not be removed.', 'izelena-foods')), 409);
+    } elseif ('get' !== $action) {
+        wp_send_json_error(array('code' => 'invalid_action', 'message' => __('That cart action is not supported.', 'izelena-foods')), 400);
+    }
+    wp_send_json_success(izelena_cart_payload());
+}
+add_action('wp_ajax_izelena_cart', 'izelena_cart_ajax');
+add_action('wp_ajax_nopriv_izelena_cart', 'izelena_cart_ajax');
 
 function izelena_register_routes() { add_rewrite_rule('^(our-story|contact|shop|wholesale)/?$', 'index.php?izelena_route=$matches[1]', 'top'); add_rewrite_rule('^product/([^/]+)/?$', 'index.php?izelena_product_route=$matches[1]', 'top'); }
 add_action('init', 'izelena_register_routes');

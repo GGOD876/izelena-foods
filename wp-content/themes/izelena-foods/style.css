@@ -177,17 +177,17 @@ footer {
 }
 
 .scotch .heat-levels > a:nth-child(1) {
-  background: #56564d;
-  color: #fff;
+  background: var(--green);
+  color: var(--ink);
 }
 
 .scotch .heat-levels > a:nth-child(2) {
-  background: #dc2329;
-  color: #fff;
+  background: var(--yellow);
+  color: var(--ink);
 }
 
 .scotch .heat-levels > a:nth-child(3) {
-  background: #050505;
+  background: var(--red);
   color: #fff;
 }
 
