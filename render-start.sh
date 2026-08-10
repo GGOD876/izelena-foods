@@ -58,15 +58,24 @@ if [ -n "$ADMIN_PASSWORD" ] && ! wp core is-installed --allow-root --path=/var/w
     --path=/var/www/html
 fi
 
-if wp core is-installed --allow-root --path=/var/www/html >/dev/null 2>&1; then
-  wp theme activate izelena-foods --allow-root --path=/var/www/html >/dev/null 2>&1 || true
-  if [ "${WOOCOMMERCE_INSTALL:-1}" = "1" ]; then
-    WOOCOMMERCE_VERSION="${WOOCOMMERCE_VERSION:-11.0.0}" \
-      WOOCOMMERCE_SEED=1 \
-      WOOCOMMERCE_PUBLISH_SEED=1 \
-      WOOCOMMERCE_PUBLISH_SLUGS="${WOOCOMMERCE_PUBLISH_SLUGS:-jerk-seasoning,jerk-bbq-sauce,mango-salsa,spicy-mango-salsa,sorrel-pepper-sauce}" \
-      WP_PATH=/var/www/html WOOCOMMERCE_CURRENCY="${WOOCOMMERCE_CURRENCY:-JMD}" /usr/local/bin/woocommerce-bootstrap.sh
+wordpress_ready=0
+for attempt in $(seq 1 15); do
+  if wp core is-installed --allow-root --path=/var/www/html >/dev/null 2>&1; then
+    wordpress_ready=1
+    break
   fi
+  sleep 2
+done
+if [ "$wordpress_ready" != "1" ]; then
+  echo "WordPress was not ready for WooCommerce bootstrap after 30 seconds." >&2
+  exit 1
 fi
+
+wp theme activate izelena-foods --allow-root --path=/var/www/html >/dev/null 2>&1 || true
+WOOCOMMERCE_VERSION="${WOOCOMMERCE_VERSION:-11.0.0}" \
+  WOOCOMMERCE_SEED=1 \
+  WOOCOMMERCE_PUBLISH_SEED=1 \
+  WOOCOMMERCE_PUBLISH_SLUGS="${WOOCOMMERCE_PUBLISH_SLUGS:-jerk-seasoning,jerk-bbq-sauce,mango-salsa,spicy-mango-salsa,sorrel-pepper-sauce}" \
+  WP_PATH=/var/www/html WOOCOMMERCE_CURRENCY="${WOOCOMMERCE_CURRENCY:-JMD}" /usr/local/bin/woocommerce-bootstrap.sh
 
 wait "$APACHE_PID"
