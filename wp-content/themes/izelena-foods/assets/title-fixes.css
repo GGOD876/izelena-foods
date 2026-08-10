@@ -359,6 +359,21 @@
   margin-top: auto;
 }
 
+.product-grid .product-row .add-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  line-height: 1;
+}
+
+.product-grid .product-row .add-btn span {
+  display: inline-flex;
+  align-items: center;
+  line-height: 1;
+  margin: 0;
+  vertical-align: middle;
+}
+
 /* Product heat is also the visual card tone: mild green, medium yellow,
  * hot red. Keep the badge inset and opaque so it remains readable over photos. */
 .product-grid .product-visual .heat-pill,

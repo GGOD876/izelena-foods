@@ -17,6 +17,14 @@
     if (!/^\d+$/.test(raw)) return 1;
     return Math.max(1, Math.min(999999, Number(raw)));
   }
+  function variationMaxQuantity(variation) {
+    if (!variation || !variation.manages_stock || variation.stock_quantity === null || variation.stock_quantity === undefined) return 999999;
+    return Math.max(0, Number(variation.stock_quantity) || 0);
+  }
+  function clampQuantity(value, maximum) {
+    var quantity = normalizeQuantity(value);
+    return maximum > 0 && maximum < 999999 ? Math.min(quantity, maximum) : quantity;
+  }
   function toast(message, type) {
     var region = document.querySelector('.izelena-toast-region');
     if (!region) { region = document.createElement('div'); region.className = 'izelena-toast-region'; region.setAttribute('aria-live', 'polite'); document.body.appendChild(region); }
@@ -65,6 +73,7 @@
   function addWoo(product, overlay, quantity, trigger) {
     var variation = selectedVariation(product, overlay); if ((product.variations || []).length && !variation) { toast('Choose an available size before adding this flavour.', 'error'); return; }
     if (variation && (!variation.purchasable || !variation.in_stock)) { toast('That size is unavailable. Please choose another variation.', 'error'); return; }
+    quantity = clampQuantity(quantity, variationMaxQuantity(variation));
     var data = {product_id: product.id, variation_id: variation ? variation.id : 0, quantity: quantity};
     var request = variation ? cartRequestWithVariation('add', data, variation) : cartRequest('add', data);
     request.then(function (payload) { serverCart = payload; renderCart(); toast(product.name + ' added to your selection', 'success'); if (overlay) closeOverlay(overlay); else if (trigger && trigger.closest('.product-detail')) window.location.href = config().shopUrl || '/shop/'; else if (trigger) openCart(trigger); }).catch(function (error) { toast(error.message, 'error'); });
@@ -88,7 +97,9 @@
     var add = target.querySelector('[data-modal-add]') || target.querySelector('[data-detail-add]');
     var hasVariations = product.variations.length > 0;
     var quantityInput = target.querySelector('[data-modal-quantity]');
-    var quantity = quantityInput ? normalizeQuantity(quantityInput.value) : 1;
+    var maximum = variationMaxQuantity(variation);
+    var quantity = quantityInput ? clampQuantity(quantityInput.value, maximum) : 1;
+    if (quantityInput) quantityInput.max = String(maximum);
     if (quantityInput) quantityInput.value = quantity;
     var available = hasVariations ? (variation && variation.in_stock && variation.purchasable) : true;
     if (variation) {

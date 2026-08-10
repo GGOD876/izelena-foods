@@ -390,6 +390,8 @@ function izelena_product_variation_data($product) {
             'price_html' => izelena_product_price_html($variation),
             'in_stock' => $variation->is_in_stock(),
             'purchasable' => $variation->is_purchasable(),
+            'manages_stock' => $variation->managing_stock(),
+            'stock_quantity' => $variation->managing_stock() && null !== $variation->get_stock_quantity() ? max(0, (int) $variation->get_stock_quantity()) : null,
             'variation_description' => wp_strip_all_tags($variation->get_description()),
             'image' => $approved_image,
         );
