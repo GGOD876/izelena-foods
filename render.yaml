@@ -3,6 +3,7 @@ services:
     name: izelena-foods
     runtime: docker
     plan: free
+    autoDeployTrigger: commit
     healthCheckPath: /
     envVars:
       - key: WORDPRESS_DB_NAME
