@@ -20,6 +20,11 @@ wp plugin activate woocommerce
 
 wp theme activate izelena-foods
 wp option update woocommerce_currency "${WOOCOMMERCE_CURRENCY:-JMD}"
+# WooCommerce's default store-visibility mode shows a "Great things are on
+# the horizon" page to logged-out visitors while admins can still browse the
+# store. The storefront is public, so explicitly disable that mode.
+wp option update woocommerce_coming_soon no
+wp option update woocommerce_store_pages_only no
 wp rewrite flush --hard
 
 echo "WooCommerce $WOOCOMMERCE_VERSION is installed and active."
