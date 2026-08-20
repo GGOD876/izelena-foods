@@ -122,6 +122,7 @@ foreach ($groups as $slug => $records) {
     $product->set_slug(sanitize_title($slug));
     $product->set_description($first['description'] ?? '');
     $product->set_status('draft');
+    $product->set_catalog_visibility('visible');
     $category = term_exists($first['category'], 'product_cat');
     if (!$category) $category = wp_insert_term($first['category'], 'product_cat');
     if (is_wp_error($category)) WP_CLI::error('Could not create product category ' . $first['category'] . '.');

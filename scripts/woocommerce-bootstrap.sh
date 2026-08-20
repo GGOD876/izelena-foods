@@ -35,6 +35,7 @@ if [ "${WOOCOMMERCE_SEED:-1}" = "1" ]; then
         exit 1
       fi
       wp post update "$product_id" --post_status=publish >/dev/null
+      wp wc product update "$product_id" --catalog_visibility=visible --user=1 >/dev/null
       variation_ids="$(wp post list --post_type=product_variation --post_parent="$product_id" --post_status=any --field=ID --format=ids)"
       if [ -n "$variation_ids" ]; then wp post update $variation_ids --post_status=publish >/dev/null; fi
     done
